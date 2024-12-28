@@ -1,0 +1,9 @@
+[package]
+name = "bolio-rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.95"
+hound = "3.5.1"
+whisper-rs = "0.13.2"
