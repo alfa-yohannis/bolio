@@ -1,31 +1,67 @@
-mod audio_transcription;
+use actix_multipart::Multipart;
+use actix_web::{web, App, HttpServer, Responder, HttpResponse, Error};
+use askama::Template;
+use futures_util::TryStreamExt;
+use std::fs;
+use std::io::Write;
 
-use audio_transcription::TranscriptionConfig;
+// Define a template for the view
+#[derive(Template)]
+#[template(path = "index.html")]
+struct IndexTemplate {
+    name: String,
+}
 
-fn main() {
-    let config = TranscriptionConfig {
-        video_path: "videos/video1.webm".to_string(),
-        aac_audio_path: "output/output_audio.aac".to_string(),
-        wav_audio_path: "output/output_audio.wav".to_string(),
-        model_path: "models/ggml-tiny-q5_1.bin".to_string(),
-        transcription_path: "transcription/transcription.txt".to_string(),
-        language: "en".to_string(),
+// Handler for rendering the view
+async fn index() -> impl Responder {
+    let template = IndexTemplate {
+        name: "Alfa".to_string(),
     };
 
-    // Ensure necessary directories exist
-    config.ensure_directories();
+    HttpResponse::Ok()
+        .content_type("text/html")
+        .body(template.render().unwrap())
+}
 
-    // Step 1: Extract audio from the video
-    config.extract_audio();
+// Handler for file upload
+async fn upload_file(mut payload: Multipart) -> Result<HttpResponse, Error> {
+    while let Some(mut field) = payload.try_next().await? {
+        let content_disposition = field.content_disposition().unwrap();
 
-    // Step 2: Convert audio to WAV
-    config.convert_audio();
+        // Extract filename
+        let filename = content_disposition
+            .get_filename()
+            .unwrap_or("default_filename")
+            .to_string();
 
-    // Step 3: Load audio samples
-    let samples = config.load_audio_samples();
+        // Create a file on the server
+        let filepath = format!("./uploads/{}", sanitize_filename::sanitize(&filename));
+        let mut file = fs::File::create(filepath)?;
 
-    // Step 4: Transcribe audio
-    config.transcribe_audio(samples);
+        // Write the chunks to the file
+        while let Some(chunk) = field.try_next().await? {
+            let data = chunk.as_ref();
+            file.write_all(data)?;
+        }
+    }
 
-    println!("🎉 Transcription completed successfully!");
+    Ok(HttpResponse::Ok().body("File uploaded successfully"))
+}
+
+// Main function to start the Actix server
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    println!("🚀 Server running on http://127.0.0.1:8080");
+
+    // Ensure the upload directory exists
+    fs::create_dir_all("./uploads").unwrap();
+
+    HttpServer::new(|| {
+        App::new()
+            .route("/", web::get().to(index)) // Root view route
+            .route("/upload", web::post().to(upload_file)) // File upload route
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }

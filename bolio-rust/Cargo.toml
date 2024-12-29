@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+actix-multipart = "0.7.2"
+actix-web = "4.9.0"
 anyhow = "1.0.95"
+askama = "0.12.1"
+futures-util = "0.3.31"
 hound = "3.5.1"
+sanitize-filename = "0.6.0"
 whisper-rs = "0.13.2"
