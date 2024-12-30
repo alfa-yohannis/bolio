@@ -10,25 +10,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome for Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <!-- Custom JavaScript for Animations -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const elements = document.querySelectorAll('.animate-on-scroll');
-
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('opacity-100', 'translate-y-0');
-          }
-        });
-      });
-
-      elements.forEach(element => {
-        element.classList.add('opacity-0', 'translate-y-10', 'transition-all', 'duration-700');
-        observer.observe(element);
-      });
-    });
-  </script>
 </head>
 
 <body class="font-sans bg-gray-50 text-gray-800">
@@ -43,7 +24,7 @@
   <main class="container mx-auto px-6 py-12 max-w-4xl">
     <section class="animate-on-scroll mb-12">
       <h2 class="text-2xl font-semibold text-green-600 mb-3"><i class="fas fa-info-circle"></i> What is Bolio.cloud?</h2>
-      <p class="text-lg">
+      <p>
         Bolio.cloud is a versatile platform designed to convert and transform various types of content seamlessly.
         Whether it's extracting text from videos, audio files, or transforming other types of data, Bolio.cloud is your go-to solution.
       </p>
@@ -51,7 +32,7 @@
 
     <section class="animate-on-scroll mb-12">
       <h2 class="text-2xl font-semibold text-green-600 mb-3"><i class="fas fa-file-audio"></i> Current Service: Audio & Video Transcription</h2>
-      <p class="text-lg">
+      <p>
         At the moment, Bolio.cloud specializes in transcribing text from video and audio files with precision and speed.
         Upload your files, and let us do the heavy lifting.
       </p>
@@ -59,7 +40,7 @@
 
     <section class="animate-on-scroll mb-12">
       <h2 class="text-2xl font-semibold text-green-600 mb-3"><i class="fas fa-wrench"></i> More Transformations Coming Soon</h2>
-      <p class="text-lg">
+      <p>
         We're constantly working on expanding our services to include more conversions and transformations.
         Stay tuned for exciting updates as we roll out new features.
       </p>
@@ -68,7 +49,7 @@
     <!-- Contact Section -->
     <section class="animate-on-scroll text-center mt-12">
       <h2 class="text-2xl font-semibold text-green-600 mb-4"><i class="fas fa-envelope"></i> Contact Us</h2>
-      <p class="text-lg mb-4">For any inquiries, feel free to reach out:</p>
+      <p class="mb-4">For any inquiries, feel free to reach out:</p>
       <a href="mailto:admin@bolio.cloud" class="text-green-600 font-medium hover:underline text-lg">
         <i class="fas fa-paper-plane"></i> admin@bolio.cloud
       </a>
@@ -85,8 +66,11 @@
   <!-- Footer -->
   <footer class="bg-gradient-to-r from-green-600 to-green-800 text-white text-center py-4 mt-12">
     <p>&copy; 2024 Bolio.cloud. All Rights Reserved.</p>
-    <p class="text-sm mt-2">Contact us at: <a href="mailto:admin@bolio.cloud" class="hover:underline">admin@bolio.cloud</a></p>
+    <p>Contact us: <a href="mailto:admin@bolio.cloud" class="hover:underline">admin@bolio.cloud</a></p>
   </footer>
+
+  <!-- JavaScript for Animations -->
+  <script src="/static/js/animations.js"></script>
 </body>
 
 </html>

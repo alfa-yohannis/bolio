@@ -36,3 +36,4 @@ bolio-old
 /bolio-rust/transcription/transcription.txt
 slides2
 *.desktop
+/website/target
