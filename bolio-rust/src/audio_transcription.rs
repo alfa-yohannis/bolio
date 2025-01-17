@@ -26,7 +26,7 @@ impl TranscriptionConfig {
     /// Extracts audio from a video and saves it as an AAC file.
     pub fn extract_audio(&self) {
         println!("🎬 Extracting audio from video...");
-        let status = Command::new("ffmpeg")
+        let status = Command::new("/data2/ffmpeg/bin/ffmpeg")
             .args([
                 "-i",
                 &self.video_path,
@@ -49,7 +49,7 @@ impl TranscriptionConfig {
     /// Converts AAC audio to WAV format (16kHz, mono).
     pub fn convert_audio(&self) {
         println!("🎵 Converting audio to 16kHz WAV format...");
-        let status = Command::new("ffmpeg")
+        let status = Command::new("/data2/ffmpeg/bin/ffmpeg")
             .args([
                 "-i",
                 &self.aac_audio_path,

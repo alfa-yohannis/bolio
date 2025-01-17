@@ -37,3 +37,4 @@ bolio-old
 slides2
 *.desktop
 /website/target
+/edinburgh.vibes/gallery/*.avif

@@ -22,7 +22,7 @@ async fn index() -> Result<HttpResponse> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("🚀 Server running at http://127.0.0.1:8080");
+    println!("🚀 Server running at http://127.0.0.1:50785");
 
     HttpServer::new(|| {
         App::new()
@@ -30,7 +30,7 @@ async fn main() -> std::io::Result<()> {
             .service(fs::Files::new("/static", "./static").show_files_listing())
             .route("/", web::get().to(index))
     })
-    .bind("127.0.0.1:8080")?
+    .bind("127.0.0.1:50785")?
     .run()
     .await
 }

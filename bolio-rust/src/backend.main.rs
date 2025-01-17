@@ -3,6 +3,9 @@ mod audio_transcription;
 use audio_transcription::TranscriptionConfig;
 
 fn main() {
+
+
+    
     let config = TranscriptionConfig {
         video_path: "videos/video1.webm".to_string(),
         aac_audio_path: "output/output_audio.aac".to_string(),
