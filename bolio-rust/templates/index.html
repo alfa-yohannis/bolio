@@ -1,34 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Actix Web Upload Page</title>
+    <title>Bolio Video2Text Converter</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100 text-gray-900 font-sans leading-normal tracking-normal">
 
     <!-- Header Section -->
     <header class="bg-blue-600 text-white text-center py-6 shadow-md">
-        <h1 class="text-3xl font-bold">Hello, {{ name }}!</h1>
-        <p class="mt-2">Welcome to your first Actix Web view with Askama.</p>
+        <h1 class="text-3xl font-bold">Bolio Video2Text Converter</h1>
+        <p class="mt-2">Easily convert video files to text with Bolio.</p>
     </header>
+
+  <!-- Navigation Links -->
+  <nav class="bg-gray-200 py-4 shadow-md">
+    <div class="container mx-auto flex justify-center gap-4">
+      <a href="/" class="text-blue-600 hover:text-blue-800 font-semibold">
+        Home
+      </a>
+      <a href="/signin" class="text-blue-600 hover:text-blue-800 font-semibold">
+        Sign In
+      </a>
+      <a href="/signup" class="text-blue-600 hover:text-blue-800 font-semibold">
+        Sign Up
+      </a>
+    </div>
+  </nav>
 
     <!-- Main Content Section -->
     <main class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
-        <h2 class="text-2xl font-semibold mb-4 text-gray-700">File Upload</h2>
-        <p class="text-gray-600 mb-6">Select a file below to upload it to the server.</p>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700">Upload Video</h2>
+        <p class="text-gray-600 mb-6">Select a video file below to convert it to text.</p>
 
         <!-- File Upload Form -->
-        <form 
-            x-data="{
+        <form x-data="{
                 uploading: false,
                 success: false,
                 error: false,
                 selectedFileName: ''
-            }"
-            @submit.prevent="
+            }" @submit.prevent="
                 uploading = true;
                 success = false;
                 error = false;
@@ -49,48 +64,37 @@
                     uploading = false;
                     error = true;
                 });
-            "
-            x-ref="uploadForm"
-            class="flex flex-col gap-4"
-        >
+            " x-ref="uploadForm" class="flex flex-col gap-4">
             <div class="flex flex-col items-center justify-center w-full gap-2">
-                <label 
-                    for="file-upload" 
-                    class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md"
-                >
-                    Select File
-                    <input 
-                        id="file-upload" 
-                        type="file" 
-                        name="file" 
-                        class="hidden" 
-                        required
-                        @change="selectedFileName = $event.target.files[0] ? $event.target.files[0].name : ''"
-                    />
+                <label for="file-upload"
+                    class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md">
+                    Select Video File
+                    <input id="file-upload" type="file" name="file" class="hidden" required
+                        accept="video/*"
+                        @change="selectedFileName = $event.target.files[0] ? $event.target.files[0].name : ''" />
                 </label>
                 <span x-show="selectedFileName" class="text-sm text-gray-600 mt-2">
                     📄 Selected File: <strong x-text="selectedFileName"></strong>
                 </span>
             </div>
 
-            <button 
-                type="submit" 
+            <button type="submit"
                 class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md shadow-md disabled:opacity-50"
-                :disabled="uploading"
-            >
-                <span x-show="!uploading">Upload File</span>
-                <span x-show="uploading">Uploading...</span>
+                :disabled="uploading">
+                <span x-show="!uploading">Convert Video</span>
+                <span x-show="uploading">Converting...</span>
             </button>
 
             <!-- Feedback Messages -->
-            <p x-show="success" class="text-green-600 text-center mt-2">✅ File uploaded successfully!</p>
-            <p x-show="error" class="text-red-600 text-center mt-2">❌ File upload failed. Please try again.</p>
+            <p x-show="success" class="text-green-600 text-center mt-2">✅ Video converted successfully!</p>
+            <p x-show="error" class="text-red-600 text-center mt-2">❌ Conversion failed. Please try again.</p>
         </form>
     </main>
 
     <!-- Footer Section -->
     <footer class="text-center text-gray-500 text-sm mt-10 py-4">
-        &copy; 2024 Actix Web Application. All Rights Reserved.
+        &copy; 2024 Bolio Video2Text Converter. All Rights Reserved.
     </footer>
 </body>
+
 </html>

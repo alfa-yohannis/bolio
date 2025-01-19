@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bolio Video2Text Converter - Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-900 font-sans leading-normal tracking-normal">
+  <!-- Header Section -->
+  <header class="bg-blue-600 text-white text-center py-6 shadow-md">
+    <h1 class="text-3xl font-bold">Bolio Video2Text Converter</h1>
+    <p class="mt-2">Log in to convert your videos to text effortlessly.</p>
+  </header>
+
+  <!-- Navigation Links -->
+  <nav class="bg-gray-200 py-4 shadow-md">
+    <div class="container mx-auto flex justify-center gap-4">
+      <a href="/" class="text-blue-600 hover:text-blue-800 font-semibold">
+        Home
+      </a>
+      <a href="/signin" class="text-blue-600 hover:text-blue-800 font-semibold">
+        Sign In
+      </a>
+      <a href="/signup" class="text-blue-600 hover:text-blue-800 font-semibold">
+        Sign Up
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Section -->
+  <main class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg max-w-3xl">
+    <h2 class="text-xl font-semibold text-center mb-6 text-gray-700">Welcome Back!</h2>
+    <form action="/signin" method="POST" class="flex flex-col gap-6">
+      <div>
+        <label for="username" class="block text-gray-700 font-semibold mb-2">Username:</label>
+        <input type="text" id="username" name="username" class="border p-2 rounded-md w-full" required />
+      </div>
+
+      <div>
+        <label for="password" class="block text-gray-700 font-semibold mb-2">Password:</label>
+        <input type="password" id="password" name="password" class="border p-2 rounded-md w-full" required />
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md">
+          Login
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <!-- Footer Section -->
+  <footer class="text-center text-gray-500 text-sm mt-10 py-4">
+    &copy; 2024 Bolio Video2Text Converter. All Rights Reserved.
+  </footer>
+</body>
+
+</html>
