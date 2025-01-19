@@ -1,30 +1,29 @@
 use actix_web::{web, HttpResponse, Responder};
-use serde::Deserialize;
+use bcrypt::{hash, DEFAULT_COST};
+use diesel::prelude::*;
+use crate::{models::NewUser, schema::users};
+use crate::DbPool;
 
-// Struct to capture signup form data
-#[derive(Deserialize)]
-pub struct SignupData {
-    username: String,
-    email: String,
-    password: String,
-    confirm_password: String,
-}
+pub async fn handle_signup(
+    pool: web::Data<DbPool>,
+    form: web::Form<NewUser>, // Use NewUser without lifetimes
+) -> impl Responder {
+    let mut conn = pool.get().expect("Couldn't get DB connection from pool");
 
-// Route to handle signup form submission
-pub async fn handle_signup(form: web::Form<SignupData>) -> impl Responder {
-    if form.password != form.confirm_password {
-        return HttpResponse::BadRequest().body("Passwords do not match.");
+    // Hash the password
+    let hashed_password = hash(&form.password, DEFAULT_COST).unwrap();
+
+    let new_user = NewUser {
+        username: form.username.clone(),
+        email: form.email.clone(),
+        password: hashed_password,
+    };
+
+    match diesel::insert_into(users::table)
+        .values(&new_user)
+        .execute(&mut conn)
+    {
+        Ok(_) => HttpResponse::Ok().body("Signup successful"),
+        Err(_) => HttpResponse::InternalServerError().body("Error signing up"),
     }
-
-    if !form.email.contains('@') {
-        return HttpResponse::BadRequest().body("Invalid email address.");
-    }
-
-    // Here you would typically save the user data to a database.
-    println!(
-        "New user signed up: username={}, email={}",
-        form.username, form.email
-    );
-
-    HttpResponse::Ok().body("Signup successful!")
 }
