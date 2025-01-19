@@ -10,13 +10,6 @@ pub struct SignupData {
     confirm_password: String,
 }
 
-// Route to render the signup page
-pub async fn render_signup_page() -> impl Responder {
-    HttpResponse::Ok()
-        .content_type("text/html")
-        .body(include_str!("../templates/signup.html"))
-}
-
 // Route to handle signup form submission
 pub async fn handle_signup(form: web::Form<SignupData>) -> impl Responder {
     if form.password != form.confirm_password {

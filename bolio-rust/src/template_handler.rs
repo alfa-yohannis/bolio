@@ -4,14 +4,10 @@ use askama::Template;
 // Template for the index page
 #[derive(Template)]
 #[template(path = "index.html")]
-pub struct IndexTemplate {
-    pub name: String,
-}
+pub struct IndexTemplate;
 
 pub async fn index() -> impl Responder {
-    let template = IndexTemplate {
-        name: "Alfa".to_string(),
-    };
+    let template = IndexTemplate;
 
     HttpResponse::Ok()
         .content_type("text/html")

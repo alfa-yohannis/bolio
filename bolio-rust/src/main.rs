@@ -16,7 +16,7 @@ async fn main() -> std::io::Result<()> {
             .service(fs::Files::new("/static", "./static").show_files_listing()) // Serve static files
             .route("/", web::get().to(template_handler::index))                  // Root view route
             .route("/upload", web::post().to(upload_handler::upload_file))       // File upload route
-            .route("/signup", web::get().to(signup_handler::render_signup_page)) // Signup page route
+            .route("/signup", web::get().to(template_handler::signup)) // Signup page route
             .route("/signup", web::post().to(signup_handler::handle_signup))     // Signup form submission
             .route("/signin", web::get().to(template_handler::signin))           // Login route
     })
