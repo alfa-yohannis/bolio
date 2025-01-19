@@ -1,11 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact - @edinburgh.vibes</title>
+  <title>@edinburgh.vibes</title>
   <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    .header-text h1:hover,
+    .header-text h2:hover {
+      animation: textHover 0.5s ease-in forwards;
+    }
+
+    @keyframes textHover {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
     body {
       font-family: 'Titillium Web', Arial, sans-serif;
       margin: 0;
@@ -35,23 +55,13 @@
 
     h2 {
       font-size: 2.5rem;
+      /* 1.5 times larger than h1 */
     }
 
-    .header-text h1:hover,
-    .header-text h2:hover {
-      animation: textHover 0.5s ease-in forwards;
-    }
-
-    @keyframes textHover {
-      0% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.1);
-      }
-      100% {
-        transform: scale(1);
-      }
+    .header-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
 
     nav {
@@ -92,18 +102,116 @@
       transform-origin: bottom left;
     }
 
+    .burger-menu {
+      display: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+      position: absolute;
+      right: 1rem;
+      top: 0.5rem;
+    }
+
+    .burger-menu div {
+      width: 25px;
+      height: 3px;
+      background-color: #fff;
+      margin: 5px 0;
+    }
+
+    .gallery {
+      display: grid;
+      /* grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); */
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      /* max-width: 1200px; */
+      margin: 0 auto;
+    }
+
+    @media (min-width: 1200px) {
+      .gallery {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .gallery img {
+      width: 100%;
+      /* border-radius: 5px; */
+      /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); */
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+
+    /* .gallery img:hover {
+      transform: scale(1.05);
+    } */
+
+    .gallery img.landscape {
+      grid-column: span 2;
+    }
+
+    .gallery img.enlarged {
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav a {
+        display: none;
+      }
+
+      nav a.active {
+        display: block;
+        margin: 10px 0;
+      }
+
+      .burger-menu {
+        display: block;
+      }
+
+      .contact-container {
+        flex-direction: column;
+      }
+
+      .contact-image {
+        order: 2;
+      }
+
+      .contact-info {
+        order: 1;
+      }
+    }
+
     .contact-container {
       max-width: 800px;
       margin: 50px auto;
       padding: 20px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 20px;
-      animation: slideIn 1.5s ease-out;
-    }
-
-    .contact-image {
-      flex: 1;
     }
 
     .contact-image img {
@@ -114,13 +222,20 @@
       cursor: pointer;
     }
 
+    @media (min-width: 1200px) {
+      .contact-image img {
+        max-width: 400px;
+      }
+    }
+
+    .contact-info {
+      flex: 1;
+    }
+
     .contact-image img:hover {
       transform: scale(1.05);
     }
 
-    .contact-info {
-      flex: 2;
-    }
 
     .contact-info h2 {
       text-align: center;
@@ -132,36 +247,6 @@
       line-height: 1.6;
       text-align: left;
     }
-
-    .contact-info a {
-      color: #007BFF;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .contact-info a:hover {
-      text-decoration: underline;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateY(-20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
   </style>
 </head>
 
@@ -171,6 +256,11 @@
       <h1>@edinburgh.vibes</h1>
       <h2>Contact</h2>
     </div>
+    <div class="burger-menu" onclick="toggleMenu()">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
     <nav>
       <a href="index.html">Portfolio</a>
       <a href="about.html">About Me</a>
@@ -179,11 +269,15 @@
   </header>
 
   <div class="contact-container">
-    <div class="contact-image" id="contact-image"></div>
     <div class="contact-info">
       <h2>Get in Touch</h2>
-      <p>For inquiries, follow us on Instagram: <a href="https://instagram.com/edinburgh.vibes" target="_blank">@edinburgh.vibes</a>, or email us at: <a href="mailto:alfa_ryano@yahoo.co.uk">alfa_ryano@yahoo.co.uk</a>. More links and resources are available on our Linktree: <a href="https://linktr.ee/edinburgh.vibes" target="_blank">https://linktr.ee/edinburgh.vibes</a>.</p>
+      <p>For inquiries, follow me on Instagram: <a href="https://instagram.com/edinburgh.vibes"
+          target="_blank">@edinburgh.vibes</a>, or email me at: <a
+          href="mailto:alfa_ryano@yahoo.co.uk">alfa_ryano@yahoo.co.uk</a>.
+        More links and resources are available on
+        Linktree: <a href="https://linktr.ee/edinburgh.vibes" target="_blank">https://linktr.ee/edinburgh.vibes</a>.</p>
     </div>
+    <div class="contact-image" id="contact-image"></div>
   </div>
 
   <script>
@@ -196,11 +290,19 @@
 
       const img = document.createElement('img');
       img.src = `/gallery/${randomImage}`;
-      img.alt = 'Contact Image';
+      img.alt = 'contact Image';
       imageContainer.appendChild(img);
+    }
+
+    function toggleMenu() {
+      const links = document.querySelectorAll('nav a');
+      links.forEach(link => {
+        link.classList.toggle('active');
+      });
     }
 
     loadRandomImage();
   </script>
 </body>
+
 </html>

@@ -39,3 +39,4 @@ slides2
 /website/target
 /edinburgh.vibes/gallery/*.avif
 /edinburghvibes/static/gallery/*.avif
+/bolio-rust/uploads/*

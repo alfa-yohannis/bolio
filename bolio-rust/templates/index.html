@@ -1,92 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ title }}</title>
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome for Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <!-- Custom JavaScript for Animations -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const elements = document.querySelectorAll('.animate-on-scroll');
-
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('opacity-100', 'translate-y-0');
-          }
-        });
-      });
-
-      elements.forEach(element => {
-        element.classList.add('opacity-0', 'translate-y-10', 'transition-all', 'duration-700');
-        observer.observe(element);
-      });
-    });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actix Web Upload Page</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-100 text-gray-900 font-sans leading-normal tracking-normal">
 
-<body class="font-sans bg-gray-50 text-gray-800">
+    <!-- Header Section -->
+    <header class="bg-blue-600 text-white text-center py-6 shadow-md">
+        <h1 class="text-3xl font-bold">Hello, {{ name }}!</h1>
+        <p class="mt-2">Welcome to your first Actix Web view with Askama.</p>
+    </header>
 
-  <!-- Header Section -->
-  <header class="bg-gradient-to-r from-green-600 to-green-800 text-white text-center py-12">
-    <h1 class="text-4xl font-bold mb-2"><i class="fas fa-cloud"></i> {{ header }}</h1>
-    <p class="text-lg">Your platform for seamless conversion and transformation.</p>
-  </header>
+    <!-- Main Content Section -->
+    <main class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700">File Upload</h2>
+        <p class="text-gray-600 mb-6">Select a file below to upload it to the server.</p>
 
-  <!-- Main Content -->
-  <main class="container mx-auto px-6 py-12 max-w-4xl">
-    <section class="animate-on-scroll mb-12">
-      <h2 class="text-2xl font-semibold text-green-600 mb-3"><i class="fas fa-info-circle"></i> What is Bolio.cloud?</h2>
-      <p class="text-lg">
-        Bolio.cloud is a versatile platform designed to convert and transform various types of content seamlessly.
-        Whether it's extracting text from videos, audio files, or transforming other types of data, Bolio.cloud is your go-to solution.
-      </p>
-    </section>
+        <!-- File Upload Form -->
+        <form 
+            x-data="{
+                uploading: false,
+                success: false,
+                error: false,
+                selectedFileName: ''
+            }"
+            @submit.prevent="
+                uploading = true;
+                success = false;
+                error = false;
+                const formData = new FormData($refs.uploadForm);
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    uploading = false;
+                    if (response.ok) {
+                        success = true;
+                    } else {
+                        error = true;
+                    }
+                })
+                .catch(() => {
+                    uploading = false;
+                    error = true;
+                });
+            "
+            x-ref="uploadForm"
+            class="flex flex-col gap-4"
+        >
+            <div class="flex flex-col items-center justify-center w-full gap-2">
+                <label 
+                    for="file-upload" 
+                    class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md"
+                >
+                    Select File
+                    <input 
+                        id="file-upload" 
+                        type="file" 
+                        name="file" 
+                        class="hidden" 
+                        required
+                        @change="selectedFileName = $event.target.files[0] ? $event.target.files[0].name : ''"
+                    />
+                </label>
+                <span x-show="selectedFileName" class="text-sm text-gray-600 mt-2">
+                    📄 Selected File: <strong x-text="selectedFileName"></strong>
+                </span>
+            </div>
 
-    <section class="animate-on-scroll mb-12">
-      <h2 class="text-2xl font-semibold text-green-600 mb-3"><i class="fas fa-file-audio"></i> Current Service: Audio & Video Transcription</h2>
-      <p class="text-lg">
-        At the moment, Bolio.cloud specializes in transcribing text from video and audio files with precision and speed.
-        Upload your files, and let us do the heavy lifting.
-      </p>
-    </section>
+            <button 
+                type="submit" 
+                class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md shadow-md disabled:opacity-50"
+                :disabled="uploading"
+            >
+                <span x-show="!uploading">Upload File</span>
+                <span x-show="uploading">Uploading...</span>
+            </button>
 
-    <section class="animate-on-scroll mb-12">
-      <h2 class="text-2xl font-semibold text-green-600 mb-3"><i class="fas fa-wrench"></i> More Transformations Coming Soon</h2>
-      <p class="text-lg">
-        We're constantly working on expanding our services to include more conversions and transformations.
-        Stay tuned for exciting updates as we roll out new features.
-      </p>
-    </section>
+            <!-- Feedback Messages -->
+            <p x-show="success" class="text-green-600 text-center mt-2">✅ File uploaded successfully!</p>
+            <p x-show="error" class="text-red-600 text-center mt-2">❌ File upload failed. Please try again.</p>
+        </form>
+    </main>
 
-    <!-- Contact Section -->
-    <section class="animate-on-scroll text-center mt-12">
-      <h2 class="text-2xl font-semibold text-green-600 mb-4"><i class="fas fa-envelope"></i> Contact Us</h2>
-      <p class="text-lg mb-4">For any inquiries, feel free to reach out:</p>
-      <a href="mailto:admin@bolio.cloud" class="text-green-600 font-medium hover:underline text-lg">
-        <i class="fas fa-paper-plane"></i> admin@bolio.cloud
-      </a>
-    </section>
-
-    <!-- Call to Action Button -->
-    <div class="text-center mt-12 animate-on-scroll">
-      <a href="#" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-full text-lg shadow-md transition-transform transform hover:-translate-y-1">
-        Get Started Now <i class="fas fa-arrow-right ml-2"></i>
-      </a>
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="bg-gradient-to-r from-green-600 to-green-800 text-white text-center py-4 mt-12">
-    <p>&copy; 2024 Bolio.cloud. All Rights Reserved.</p>
-    <p class="text-sm mt-2">Contact us at: <a href="mailto:admin@bolio.cloud" class="hover:underline">admin@bolio.cloud</a></p>
-  </footer>
+    <!-- Footer Section -->
+    <footer class="text-center text-gray-500 text-sm mt-10 py-4">
+        &copy; 2024 Actix Web Application. All Rights Reserved.
+    </footer>
 </body>
-
 </html>

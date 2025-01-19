@@ -1,4 +1,6 @@
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -118,10 +120,12 @@
 
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
-      padding: 20px;
-      max-width: 1200px;
+      /* grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); */
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      /* max-width: 1200px; */
       margin: 0 auto;
     }
 
@@ -133,15 +137,15 @@
 
     .gallery img {
       width: 100%;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      /* border-radius: 5px; */
+      /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); */
       transition: transform 0.2s;
       cursor: pointer;
     }
 
-    .gallery img:hover {
+    /* .gallery img:hover {
       transform: scale(1.05);
-    }
+    } */
 
     .gallery img.landscape {
       grid-column: span 2;
