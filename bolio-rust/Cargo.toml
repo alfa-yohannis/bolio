@@ -11,7 +11,7 @@ actix-web = "4.9.0"
 anyhow = "1.0.95"
 askama = "0.12.1"
 bcrypt = "0.16.0"
-chrono = "0.4.39"
+chrono = { version = "0.4.39", features = ["serde"] }
 diesel = { version = "2.2.6", features = ["postgres", "chrono", "r2d2"] }
 dotenvy = "0.15.7"
 futures-util = "0.3.31"
@@ -23,4 +23,5 @@ sanitize-filename = "0.6.0"
 serde = { version = "1.0.217", features = ["derive"] }
 serde_derive = "1.0.217"
 symphonia = "0.5.4"
+uuid = {version = "1.12.0"  , features = ["v4"]}
 whisper-rs = "0.13.2"

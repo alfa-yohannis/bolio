@@ -6,7 +6,9 @@ diesel::table! {
         username -> Varchar,
         email -> Varchar,
         password -> Varchar,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
+        last_login -> Nullable<Timestamptz>,
+        session_id -> Nullable<Varchar>,
     }
 }

@@ -24,3 +24,27 @@ function validateForm(event) {
 
   document.getElementById("signupForm").submit();
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Function to retrieve session_id from cookies
+  function getSessionId() {
+    const cookies = document.cookie.split("; ");
+    for (const cookie of cookies) {
+      const [name, value] = cookie.split("=");
+      if (name === "session_id") {
+        return value;
+      }
+    }
+    return null;
+  }
+
+  // Check session_id and update the navigation link
+  const sessionId = getSessionId();
+  const signInLink = document.getElementById("signin-link");
+
+  if (sessionId) {
+    // Change "Sign In" to "Sign Out"
+    signInLink.href = "/signout";
+    signInLink.textContent = "Sign Out";
+  }
+});
