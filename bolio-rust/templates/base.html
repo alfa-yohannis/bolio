@@ -20,10 +20,22 @@
     <nav class="bg-gray-200 py-4 shadow-md">
         <div class="container mx-auto flex justify-center gap-4">
             <a href="/" class="text-blue-600 hover:text-blue-800 font-semibold">Home</a>
-            <a id="signin-link" href="/signin" class="text-blue-600 hover:text-blue-800 font-semibold">Sign In</a>
+            {% if session_id.is_some() %}
+                <a href="/signout" class="text-blue-600 hover:text-blue-800 font-semibold">Sign Out</a>
+            {% else %}
+                <a href="/signin" class="text-blue-600 hover:text-blue-800 font-semibold">Sign In</a>
+            {% endif %}
             <a href="/signup" class="text-blue-600 hover:text-blue-800 font-semibold">Sign Up</a>
         </div>
     </nav>
+
+    <!-- <nav class="bg-gray-200 py-4 shadow-md">
+        <div class="container mx-auto flex justify-center gap-4">
+            <a href="/" class="text-blue-600 hover:text-blue-800 font-semibold">Home</a>
+            <a id="signin-link" href="/signin" class="text-blue-600 hover:text-blue-800 font-semibold">Sign In</a>
+            <a href="/signup" class="text-blue-600 hover:text-blue-800 font-semibold">Sign Up</a>
+        </div>
+    </nav> -->
 
 
     <!-- Main Content Section -->

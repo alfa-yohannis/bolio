@@ -24,7 +24,7 @@ function validateForm(event) {
 
   document.getElementById("signupForm").submit();
 }
-
+ 
 document.addEventListener("DOMContentLoaded", () => {
   // Function to retrieve session_id from cookies
   function getSessionId() {
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const sessionId = getSessionId();
   const signInLink = document.getElementById("signin-link");
 
-  if (sessionId) {
+  if (sessionId && signInLink != null) {
     // Change "Sign In" to "Sign Out"
     signInLink.href = "/signout";
     signInLink.textContent = "Sign Out";

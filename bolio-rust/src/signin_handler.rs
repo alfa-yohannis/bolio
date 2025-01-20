@@ -1,4 +1,4 @@
-use actix_web::{web, HttpResponse, HttpRequest, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use actix_web::http::header::{LOCATION, SET_COOKIE};
 use bcrypt::verify;
 use diesel::prelude::*;
