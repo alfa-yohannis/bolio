@@ -13,7 +13,9 @@
         error: false,
         selectedFileName: '',
         email: '',
-        emailError: ''
+        emailError: '',
+        resultText: '',
+        statusMessage: ''
     }" @submit.prevent="
         if (!validateEmail(email)) {
             emailError = 'Please enter a valid email address.';
@@ -28,17 +30,22 @@
             method: 'POST',
             body: formData
         })
-        .then(response => {
+        .then(response => response.json())
+        .then(data => {
             uploading = false;
-            if (response.ok) {
+            if (data.status === 'success') {
                 success = true;
+                resultText = data.text;
+                statusMessage = data.message;
             } else {
                 error = true;
+                statusMessage = data.message;
             }
         })
         .catch(() => {
             uploading = false;
             error = true;
+            statusMessage = 'An unexpected error occurred.';
         });
     " x-ref="uploadForm" class="flex flex-col gap-4">
 
@@ -81,8 +88,18 @@
     </button>
 
     <!-- Feedback Messages -->
-    <p x-show="success" class="text-green-600 text-center mt-2">✅ Video converted successfully!</p>
-    <p x-show="error" class="text-red-600 text-center mt-2">❌ Conversion failed. Please try again.</p>
+    <p x-show="success" class="text-green-600 text-center mt-2" x-text="statusMessage"></p>
+    <p x-show="error" class="text-red-600 text-center mt-2" x-text="statusMessage"></p>
+
+    <!-- Result Text Display -->
+    <div x-show="success" class="mt-6 p-4 bg-gray-100 border rounded-lg">
+        <h3 class="text-lg font-medium text-gray-700">Converted Text:</h3>
+        <textarea x-model="resultText" class="w-full mt-2 p-2 border rounded-md bg-white" rows="6" readonly></textarea>
+        <button type="button" @click="navigator.clipboard.writeText(resultText)"
+            class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md">
+            Copy to Clipboard
+        </button>
+    </div>
 </form>
 
 <style>
@@ -100,4 +117,11 @@
         }
     }
 </style>
+
+<!-- <script>
+    function validateEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+</script> -->
 {% endblock %}
