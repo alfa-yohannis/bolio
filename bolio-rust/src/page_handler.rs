@@ -23,6 +23,27 @@ pub async fn index(req: HttpRequest) -> impl Responder {
         .body(template.render().unwrap())
 }
 
+#[derive(Template)]
+#[template(path = "video2text.html")]
+pub struct Video2TextTemplate {
+    pub session_id: Option<String>, // Use Option to handle absence of a session
+}
+
+pub async fn video2text(req: HttpRequest) -> impl Responder {
+    // Retrieve session_id from cookies
+    let session_id = req
+        .cookie("session_id")
+        .map(|cookie| cookie.value().to_string());
+
+    let template: Video2TextTemplate = Video2TextTemplate {
+        session_id: session_id.clone(),
+    };
+
+    HttpResponse::Ok()
+        .content_type("text/html")
+        .body(template.render().unwrap())
+}
+
 // pub async fn index(session_id: Option<String>) -> impl Responder {
 //     let template = IndexTemplate {
 //         session_id: session_id.clone(),

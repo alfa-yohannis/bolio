@@ -47,6 +47,7 @@ async fn main() -> std::io::Result<()> {
             .route("/signin", web::get().to(page_handler::signin)) // Login page route
             .route("/signin", web::post().to(signin_handler::signin_handler)) // Login form submission
             .route("/signout", web::get().to(signout_handler::signout_handler)) // Sign-out route
+            .route("/video2text", web::get().to(page_handler::video2text)) // Sign-out route
     })
     .bind(("127.0.0.1", 8082))?
     .run()

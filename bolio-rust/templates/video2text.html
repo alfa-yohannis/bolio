@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Bolio Video2Text Converter{% endblock %}
+{% block subtitle %}Easily convert video files to text with Bolio.{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4 text-gray-700">Upload Video</h2>
+<p class="text-gray-600 mb-6">Select a video file below to convert it to text.</p>
+
+<!-- File Upload Form -->
+<form x-data="{
+        uploading: false,
+        success: false,
+        error: false,
+        selectedFileName: '',
+        email: '',
+        emailError: ''
+    }" @submit.prevent="
+        if (!validateEmail(email)) {
+            emailError = 'Please enter a valid email address.';
+            return;
+        }
+        uploading = true;
+        success = false;
+        error = false;
+        emailError = '';
+        const formData = new FormData($refs.uploadForm);
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            uploading = false;
+            if (response.ok) {
+                success = true;
+            } else {
+                error = true;
+            }
+        })
+        .catch(() => {
+            uploading = false;
+            error = true;
+        });
+    " x-ref="uploadForm" class="flex flex-col gap-4">
+
+    <!-- Email Input -->
+    <div class="flex flex-col gap-2">
+        <label for="email" class="font-medium text-gray-700">Email Address (We will send the result to your email too!)</label>
+        <input id="email" type="email" name="email"
+            class="border rounded-md py-2 px-3 w-full focus:ring focus:ring-blue-200" x-model="email"
+            @input="emailError = ''" required />
+        <p x-show="emailError" class="text-red-600 text-sm" x-text="emailError"></p>
+    </div>
+
+    <!-- File Upload Input -->
+    <div class="flex flex-col items-center justify-center w-full gap-2">
+        <label for="file-upload"
+            class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md">
+            Select Video File
+            <input id="file-upload" type="file" name="file" class="hidden" required accept="video/*"
+                @change="selectedFileName = $event.target.files[0] ? $event.target.files[0].name : ''" />
+        </label>
+        <span x-show="selectedFileName" class="text-sm text-gray-600 mt-2">
+            📄 Selected File: <strong x-text="selectedFileName"></strong>
+        </span>
+    </div>
+
+    <!-- Please Wait Message -->
+    <p x-show="uploading" class="text-blue-600 text-center mt-4">Please wait, it may take some time...</p>
+
+    <!-- Running Wheel -->
+    <div x-show="uploading" class="flex justify-center mt-4">
+        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit"
+        class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md shadow-md disabled:opacity-50"
+        :disabled="uploading">
+        <span x-show="!uploading">Convert Video</span>
+        <span x-show="uploading">Converting...</span>
+    </button>
+
+    <!-- Feedback Messages -->
+    <p x-show="success" class="text-green-600 text-center mt-2">✅ Video converted successfully!</p>
+    <p x-show="error" class="text-red-600 text-center mt-2">❌ Conversion failed. Please try again.</p>
+</form>
+
+<style>
+    .loader {
+        border-color: #3498db transparent transparent transparent;
+        animation: spin 1.2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}

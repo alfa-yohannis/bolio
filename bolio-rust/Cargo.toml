@@ -20,6 +20,7 @@ hound = "3.5.1"
 mp4parse = "0.17.0"
 r2d2 = "0.8.10"
 r2d2-diesel = "1.0.0"
+regex = "1.11.1"
 sanitize-filename = "0.6.0"
 serde = { version = "1.0.217", features = ["derive"] }
 serde_derive = "1.0.217"

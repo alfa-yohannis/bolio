@@ -1,61 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}Bolio Video2Text Converter{% endblock %}
-{% block subtitle %}Easily convert video files to text with Bolio.{% endblock %}
+{% block title %}Bolio Home{% endblock %}
+{% block subtitle %}Welcome to Bolio, your all-in-one conversion platform.{% endblock %}
 {% block content %}
-<h2 class="text-2xl font-semibold mb-4 text-gray-700">Upload Video</h2>
-<p class="text-gray-600 mb-6">Select a video file below to convert it to text.</p>
+<h1 class="text-3xl font-bold mb-6 text-gray-800">Welcome to Bolio</h1>
+<p class="text-gray-600 mb-6">Choose one of the services below to get started:</p>
 
-<!-- File Upload Form -->
-<form x-data="{
-        uploading: false,
-        success: false,
-        error: false,
-        selectedFileName: ''
-    }" @submit.prevent="
-        uploading = true;
-        success = false;
-        error = false;
-        const formData = new FormData($refs.uploadForm);
-        fetch('/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            uploading = false;
-            if (response.ok) {
-                success = true;
-            } else {
-                error = true;
-            }
-        })
-        .catch(() => {
-            uploading = false;
-            error = true;
-        });
-    " x-ref="uploadForm" class="flex flex-col gap-4">
-    <div class="flex flex-col items-center justify-center w-full gap-2">
-        <label for="file-upload"
-            class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md">
-            Select Video File
-            <input id="file-upload" type="file" name="file" class="hidden" required
-                accept="video/*"
-                @change="selectedFileName = $event.target.files[0] ? $event.target.files[0].name : ''" />
-        </label>
-        <span x-show="selectedFileName" class="text-sm text-gray-600 mt-2">
-            📄 Selected File: <strong x-text="selectedFileName"></strong>
-        </span>
-    </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Video to Text Conversion -->
+    <a href="/video2text" class="block p-6 bg-white shadow-lg rounded-lg hover:bg-gray-100">
+        <h2 class="text-xl font-semibold text-gray-700">Video to Text Converter</h2>
+        <p class="text-gray-500 mt-2">Easily convert your video files into text.</p>
+    </a>
 
-    <button type="submit"
-        class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md shadow-md disabled:opacity-50"
-        :disabled="uploading">
-        <span x-show="!uploading">Convert Video</span>
-        <span x-show="uploading">Converting...</span>
-    </button>
-
-    <!-- Feedback Messages -->
-    <p x-show="success" class="text-green-600 text-center mt-2">✅ Video converted successfully!</p>
-    <p x-show="error" class="text-red-600 text-center mt-2">❌ Conversion failed. Please try again.</p>
-</form>
+    <!-- Other Service Placeholder -->
+    <a href="#" class="block p-6 bg-white shadow-lg rounded-lg hover:bg-gray-100">
+        <h2 class="text-xl font-semibold text-gray-700">Coming Soon</h2>
+        <p class="text-gray-500 mt-2">More amazing tools to enhance your workflow.</p>
+    </a>
+</div>
 {% endblock %}
