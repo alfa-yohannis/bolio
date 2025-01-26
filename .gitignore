@@ -40,3 +40,6 @@ slides2
 /edinburgh.vibes/gallery/*.avif
 /edinburghvibes/static/gallery/*.avif
 /bolio-rust/uploads/*
+bolio-rust/temp/transcription.txt
+temp
+^temp/.gitignore
