@@ -1,3 +1,4 @@
+mod audio_transcription;
 mod middlewares;
 mod models;
 mod page_handler;
