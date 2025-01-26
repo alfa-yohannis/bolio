@@ -8,50 +8,71 @@
 
 <!-- File Upload Form -->
 <form x-data="{
-        uploading: false,
-        success: false,
-        error: false,
-        selectedFileName: '',
-        email: '',
-        emailError: '',
-        resultText: '',
-        statusMessage: ''
-    }" @submit.prevent="
-        if (!validateEmail(email)) {
-            emailError = 'Please enter a valid email address.';
-            return;
+    uploading: false,
+    success: false,
+    error: false,
+    selectedFileName: '',
+    email: '',
+    emailError: '',
+    resultText: '',
+    statusMessage: '',
+    allowedExtensions: ['.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mpg', '.mpeg', '.m4v', '.3gp', '.3g2', '.vob', '.ogv', '.rm', '.rmvb', '.asf', '.ts', '.m2ts', '.f4v', '.divx', '.xvid', '.mxf', '.hevc', '.h264', '.dv', '.drc', '.ogm', '.ivf', '.amv', '.av1', '.vp9', '.qt', '.prores', '.mp3', '.wav', '.flac', '.aac', '.ogg', '.wma', '.m4a', '.alac', '.aiff', '.amr', '.opus', '.pcm', '.mid', '.midi', '.ra', '.rm', '.mpc', '.tta', '.dsd', '.ape', '.caf', '.wv', '.gsm', '.s3m', '.it', '.mod', '.xm'],
+    validateFile(file) {
+        if (!file) {
+            return false;
         }
-        uploading = true;
-        success = false;
-        error = false;
-        emailError = '';
-        const formData = new FormData($refs.uploadForm);
-        fetch('/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            uploading = false;
-            if (data.status === 'success') {
-                success = true;
-                resultText = data.text;
-                statusMessage = data.message;
-            } else {
-                error = true;
-                statusMessage = data.message;
-            }
-        })
-        .catch(() => {
-            uploading = false;
+        const fileSizeLimit = 10485760; // 10 MB in bytes
+        const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+        if (!this.allowedExtensions.includes(fileExtension)) {
+            alert(`Invalid file type. Allowed extensions are: ${this.allowedExtensions.join(', ')}`);
+            return false;
+        }
+
+        if (file.size > fileSizeLimit) {
+            alert('File size must be less than 10MB. Sign in and buy credits to convert larger files.');
+            return false;
+        }
+
+        return true;
+    }
+}" @submit.prevent="
+    if (!validateEmail(email)) {
+        emailError = 'Please enter a valid email address.';
+        return;
+    }
+    uploading = true;
+    success = false;
+    error = false;
+    emailError = '';
+    const formData = new FormData($refs.uploadForm);
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        uploading = false;
+        if (data.status === 'success') {
+            success = true;
+            resultText = data.text;
+            statusMessage = data.message;
+        } else {
             error = true;
-            statusMessage = 'An unexpected error occurred.';
-        });
-    " x-ref="uploadForm" class="flex flex-col gap-4">
+            statusMessage = data.message;
+        }
+    })
+    .catch(() => {
+        uploading = false;
+        error = true;
+        statusMessage = 'An unexpected error occurred.';
+    });
+" x-ref="uploadForm" class="flex flex-col gap-4">
 
     <!-- Email Input -->
     <div class="flex flex-col gap-2">
-        <label for="email" class="font-medium text-gray-700">Email Address (We will send the result to your email too!)</label>
+        <label for="email" class="font-medium text-gray-700">Email Address (We will send the result to your email
+            too!)</label>
         <input id="email" type="email" name="email"
             class="border rounded-md py-2 px-3 w-full focus:ring focus:ring-blue-200" x-model="email"
             @input="emailError = ''" required />
@@ -62,9 +83,16 @@
     <div class="flex flex-col items-center justify-center w-full gap-2">
         <label for="file-upload"
             class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md">
-            Select Video File
-            <input id="file-upload" type="file" name="file" class="hidden" required accept="video/*"
-                @change="selectedFileName = $event.target.files[0] ? $event.target.files[0].name : ''" />
+            Select Video or Audio File
+            <input id="file-upload" type="file" name="file" class="hidden" required @change="
+                const file = $event.target.files[0];
+                if (validateFile(file)) {
+                    selectedFileName = file.name;
+                } else {
+                    $event.target.value = '';
+                    selectedFileName = '';
+                }
+            " />
         </label>
         <span x-show="selectedFileName" class="text-sm text-gray-600 mt-2">
             📄 Selected File: <strong x-text="selectedFileName"></strong>
@@ -83,7 +111,7 @@
     <button type="submit"
         class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md shadow-md disabled:opacity-50"
         :disabled="uploading">
-        <span x-show="!uploading">Convert Video</span>
+        <span x-show="!uploading">Convert File</span>
         <span x-show="uploading">Converting...</span>
     </button>
 
@@ -112,6 +140,7 @@
         0% {
             transform: rotate(0deg);
         }
+
         100% {
             transform: rotate(360deg);
         }

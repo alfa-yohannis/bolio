@@ -131,8 +131,10 @@ impl TranscriptionConfig {
                 format_timestamp(end_timestamp.try_into().unwrap()),
                 segment
             );
-            transcribed_text.push_str(&format!("{}", segment.trim()));
+            transcribed_text.push_str(&format!("{} ", segment));
         }
+
+        transcribed_text = transcribed_text.trim().to_string();
 
         let mut file: File =
             File::create(&self.transcription_path).expect("Failed to create transcription file");
