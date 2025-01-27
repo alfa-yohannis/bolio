@@ -1,5 +1,5 @@
 use actix_multipart::Multipart;
-use actix_web::{Error, HttpResponse};
+use actix_web::{web, Error, HttpRequest, HttpResponse};
 use diesel::prelude::*;
 use futures_util::TryStreamExt;
 use regex::Regex;
@@ -9,13 +9,44 @@ use std::io::Write;
 
 use crate::audio_transcription::TranscriptionConfig;
 use crate::models::NewConversionTransaction; // Model for inserting a conversion transaction
+use crate::models::User;
 use crate::schema::{conversion_transactions, users}; // Diesel schema for users and conversion_transactions
-use crate::DbPool; // Database connection pool
+use crate::DbPool; // Database connection pool // Assuming you have a User model defined
 
-pub async fn upload_file(mut payload: Multipart) -> Result<HttpResponse, Error> {
+pub async fn upload_file(
+    req: HttpRequest,
+    mut payload: Multipart,
+    pool: web::Data<DbPool>,
+) -> Result<HttpResponse, Error> {
     let mut conversion_result = String::new();
     let mut source_size = 0; // To track the size of the uploaded file
     let mut target_size = 0; // To simulate the size of the resulting transcription
+
+    let conversion_type = "video-to-text";
+    let target_type = "txt";
+
+    let session_id = req
+        .cookie("session_id")
+        .map(|cookie| cookie.value().to_string());
+
+    let username = req
+        .cookie("username")
+        .map(|cookie| cookie.value().to_string());
+
+    // Insert conversion transaction and update user credit
+    let mut conn = pool.get().expect("Failed to get database connection");
+
+    let user = if let Some(ref username) = username {
+        // Retrieve the user by username and session_id
+        users::table
+            .filter(users::username.eq(&username))
+            .filter(users::session_id.eq(session_id.as_deref().unwrap_or("")))
+            .first::<User>(&mut conn)
+            .optional()
+            .map_err(|e| actix_web::error::ErrorInternalServerError(e))?
+    } else {
+        None
+    };
 
     while let Some(mut field) = payload.try_next().await? {
         let content_disposition = field.content_disposition().unwrap();
@@ -25,6 +56,31 @@ pub async fn upload_file(mut payload: Multipart) -> Result<HttpResponse, Error> 
             .get_filename()
             .unwrap_or("default_filename")
             .to_string();
+
+        // Get the file extension
+        let source_type = match filename.split('.').last() {
+            Some(ext) => ext.to_string(),
+            None => {
+                return Ok(HttpResponse::BadRequest().json(json!({
+                    "status": "error",
+                    "message": "Failed to get file extension"
+                })));
+            }
+        };
+
+        // Validate the file extension
+        let valid_extensions = [
+            "mp4", "mkv", "avi", "mov", "wmv", "flv", "webm", "mpg", "mpeg", "m4v", "3gp", "3g2",
+            "vob", "ogv", "rm", "rmvb", "asf", "ts", "m2ts", "f4v", "divx", "xvid", "mxf", "hevc",
+            "h264", "dv", "drc", "ogm", "ivf", "amv", "av1", "vp9", "qt", "prores",
+        ];
+
+        if !valid_extensions.contains(&source_type.as_str()) {
+            return Ok(HttpResponse::BadRequest().json(json!({
+            "status": "error",
+            "message": "Invalid file type"
+            })));
+        }
 
         // Handle email validation
         if field.name() == Some("email") {
@@ -75,12 +131,14 @@ pub async fn upload_file(mut payload: Multipart) -> Result<HttpResponse, Error> 
                 file.write_all(data)?;
                 source_size += data.len() as i64; // Accumulate the source file size in bytes
 
-                // check the size of the uploaded file
-                if source_size > 10 * 1024 * 1024 {
-                    return Ok(HttpResponse::BadRequest().json(json!({
-                        "status": "error",
-                        "message": "File size must be smaller than 10 MB."
-                    })));
+                // Check if username and session_id exist
+                if username.is_none() || session_id.is_none() {
+                    if source_size > 10 * 1024 * 1024 {
+                        return Ok(HttpResponse::BadRequest().json(json!({
+                            "status": "error",
+                            "message": "File size must be smaller than 10 MB for unauthenticated users."
+                        })));
+                    }
                 }
             }
 
@@ -110,43 +168,74 @@ pub async fn upload_file(mut payload: Multipart) -> Result<HttpResponse, Error> 
 
             conversion_result = fs::read_to_string(&config.transcription_path)?;
 
-            // Clean up temporary files
-            fs::remove_file(&filepath)?;
-            fs::remove_file(&config.aac_audio_path)?;
-            fs::remove_file(&config.wav_audio_path)?;
-            fs::remove_file(&config.transcription_path)?;
-
             // Calculate the target file size based on the conversion result
             target_size = conversion_result.len() as i64;
 
             // Calculate total credit used (source + target sizes)
             let credit_used = source_size + target_size;
 
-            // Insert conversion transaction and update user credit
-            // let mut conn = pool.get().expect("Failed to get database connection");
+            if let Some(ref username) = username {
+                // Retrieve the user by username and session_id
+                let user = users::table
+                    .filter(users::username.eq(&username))
+                    .filter(users::session_id.eq(session_id.as_deref().unwrap_or("")))
+                    .first::<User>(&mut conn)
+                    .optional()
+                    .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
 
-            // conn.transaction::<_, diesel::result::Error, _>(|_| {
-            //     // Create a conversion transaction
-            //     let new_transaction = NewConversionTransaction {
-            //         user_id,
-            //         source_size,
-            //         target_size,
-            //         conversion_type: "video-to-text".to_string(),
-            //         source_type: "mp4".to_string(),
-            //         target_type: "txt".to_string(),
-            //     };
+                if let Some(user) = user {
+                    // Insert conversion transaction
+                    let new_transaction = NewConversionTransaction {
+                        user_id: user.id,
+                        source_size,
+                        target_size,
+                        conversion_type: conversion_type.to_string(),
+                        source_type: source_type,
+                        target_type: target_type.to_string(),
+                    };
 
-            //     diesel::insert_into(conversion_transactions::table)
-            //         .values(&new_transaction)
-            //         .execute(&mut conn)?;
+                    conn.transaction::<_, diesel::result::Error, _>(|conn| {
+                        diesel::insert_into(conversion_transactions::table)
+                            .values(&new_transaction)
+                            .execute(conn)?;
 
-            //     // Reduce the user's credit
-            //     diesel::update(users::table.filter(users::id.eq(user_id)))
-            //         .set(users::credit.eq(users::credit - credit_used))
-            //         .execute(&mut conn)?;
+                        // Update user credit
+                        diesel::update(users::table.filter(users::id.eq(user.id)))
+                            .set(users::credit.eq(users::credit - credit_used))
+                            .execute(conn)?;
 
-            //     Ok(())
-            // })?;
+                        Ok(())
+                    }).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+
+                    // Clean up temporary files
+                    fs::remove_file(&filepath)?;
+                    fs::remove_file(&config.aac_audio_path)?;
+                    fs::remove_file(&config.wav_audio_path)?;
+                    fs::remove_file(&config.transcription_path)?;
+                } else {
+                    // Clean up temporary files
+                    fs::remove_file(&filepath)?;
+                    fs::remove_file(&config.aac_audio_path)?;
+                    fs::remove_file(&config.wav_audio_path)?;
+                    fs::remove_file(&config.transcription_path)?;
+
+                    return Ok(HttpResponse::BadRequest().json(json!({
+                        "status": "error",
+                        "message": "User not found"
+                    })));
+                }
+            } else {
+                // Clean up temporary files
+                fs::remove_file(&filepath)?;
+                fs::remove_file(&config.aac_audio_path)?;
+                fs::remove_file(&config.wav_audio_path)?;
+                fs::remove_file(&config.transcription_path)?;
+
+                return Ok(HttpResponse::BadRequest().json(json!({
+                    "status": "error",
+                    "message": "Username not provided"
+                })));
+            }
 
             // conversion_result;
         }

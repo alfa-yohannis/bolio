@@ -44,12 +44,16 @@ pub async fn signin_handler(
                     return HttpResponse::InternalServerError().body("Error updating session");
                 }
 
-                // Redirect to index with a session cookie
+                // Redirect to index with session cookies
                 HttpResponse::SeeOther()
                     .append_header((LOCATION, "/")) // Redirect to the index page
                     .append_header((
                         SET_COOKIE,
-                        format!("session_id={}; Path=/", new_session_id), // Set session cookie
+                        format!("session_id={}; Path=/; HttpOnly", new_session_id), // Session ID cookie
+                    ))
+                    .append_header((
+                        SET_COOKIE,
+                        format!("username={}; Path=/", user.username), // Username cookie
                     ))
                     .finish()
             } else {

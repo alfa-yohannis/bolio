@@ -42,7 +42,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(pool.clone())) // Pass the database pool to the app
             .service(fs::Files::new("/static", "./static").show_files_listing()) // Serve static files
             .route("/", web::get().to(page_handler::index)) // Root view route
-            .route("/upload", web::post().to(upload_handler::upload_file)) // File upload route
+            .route("/upload", web::post().to(upload_handler::upload_file)) // File upload route // File upload route
             .route("/signup", web::get().to(page_handler::signup)) // Signup page route
             .route("/signup", web::post().to(signup_handler::handle_signup)) // Signup form submission
             .route("/signin", web::get().to(page_handler::signin)) // Login page route
