@@ -6,6 +6,11 @@
 <h2 class="text-2xl font-semibold mb-4 text-gray-700">Upload Video</h2>
 <p class="text-gray-600 mb-6">Select a video file below to convert it to text.</p>
 
+<script>
+    // Askama
+    const isGuest = {{ username == "Guest" }};
+</script>
+
 <!-- File Upload Form -->
 <form x-data="{
     uploading: false,
@@ -29,7 +34,7 @@
             return false;
         }
 
-        if (file.size > fileSizeLimit) {
+        if (isGuest && file.size > fileSizeLimit) {
             alert('File size must be less than 10MB. Sign in and buy credits to convert larger files.');
             return false;
         }
@@ -50,8 +55,20 @@
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        //console.log(response);
+        // Check if response status is ok
+        if (!response.ok) {
+            //console.log(response);
+            // Parse JSON error body
+            return response.json().then(err => {
+                throw err; // Throw the error to be caught below
+            });
+        }
+        return response.json();
+    })
     .then(data => {
+        //console.log(data);
         uploading = false;
         if (data.status === 'success') {
             success = true;
@@ -59,14 +76,16 @@
             statusMessage = data.message;
         } else {
             error = true;
-            statusMessage = data.message;
+            statusMessage = data.message; // Handle non-error JSON responses
         }
     })
-    .catch(() => {
+    .catch(err => {
+        console.error(err); // Log error for debugging
         uploading = false;
         error = true;
-        statusMessage = 'An unexpected error occurred.';
+        statusMessage = err.message || 'An unexpected error occurred.';
     });
+    
 " x-ref="uploadForm" class="flex flex-col gap-4">
 
     <!-- Email Input -->

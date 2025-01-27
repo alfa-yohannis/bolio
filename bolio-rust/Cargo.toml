@@ -14,9 +14,11 @@ bcrypt = "0.16.0"
 chrono = { version = "0.4.39", features = ["serde"] }
 diesel = { version = "2.2.6", features = ["postgres", "chrono", "r2d2"] }
 dotenvy = "0.15.7"
+env_logger = "0.11.6"
 futures = "0.3.31"
 futures-util = "0.3.31"
 hound = "3.5.1"
+log = "0.4.25"
 mp4parse = "0.17.0"
 r2d2 = "0.8.10"
 r2d2-diesel = "1.0.0"

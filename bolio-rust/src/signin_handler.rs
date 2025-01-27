@@ -1,11 +1,51 @@
-use actix_web::{web, HttpResponse, Responder};
+// use crate::{models::User, schema::users::dsl::*, DbPool};
+// use actix_web::http::header::{LOCATION, SET_COOKIE};
+// use actix_web::{web, HttpRequest, HttpResponse, Responder};
+// use askama::Template;
+// use bcrypt::verify;
+// use chrono::Utc;
+// use diesel::prelude::*;
+// use serde::Deserialize;
+// use uuid::Uuid;
+
+use crate::models::User;
+use crate::schema::users::dsl::*;
+use crate::DbPool;
 use actix_web::http::header::{LOCATION, SET_COOKIE};
+use actix_web::{web, HttpRequest, HttpResponse, Responder};
+use askama::Template;
 use bcrypt::verify;
+use chrono::Utc;
 use diesel::prelude::*;
 use serde::Deserialize;
-use crate::{models::User, schema::users::dsl::*, DbPool};
-use chrono::Utc;
 use uuid::Uuid;
+
+// Template for the signin page
+#[derive(Template)]
+#[template(path = "signin.html")]
+pub struct SigninTemplate {
+    pub session_id: Option<String>, // Use Option to handle absence of a session
+    pub username: String,           // Use Option to handle absence of a username
+}
+
+pub async fn signin(req: HttpRequest) -> impl Responder {
+    // Retrieve session_id and username from cookies
+    let session_cookie = req
+        .cookie("session_id")
+        .map(|cookie| cookie.value().to_string());
+    let username_cookie = req
+        .cookie("username")
+        .map(|cookie| cookie.value().to_string());
+
+    let template = SigninTemplate {
+        session_id: session_cookie,
+        username: username_cookie.unwrap_or_else(|| "Guest".to_string()),
+    };
+
+    HttpResponse::Ok()
+        .content_type("text/html")
+        .body(template.render().unwrap())
+}
 
 #[derive(Deserialize)]
 pub struct SignInForm {
@@ -20,9 +60,7 @@ pub async fn signin_handler(
     let mut conn = pool.get().expect("Couldn't get DB connection from pool");
 
     // Retrieve the user by username
-    let user: Result<User, _> = users
-        .filter(username.eq(&form.username))
-        .first(&mut conn);
+    let user: Result<User, _> = users.filter(username.eq(&form.username)).first(&mut conn);
 
     match user {
         Ok(user) => {

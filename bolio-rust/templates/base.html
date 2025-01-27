@@ -17,27 +17,30 @@
         <p class="mt-2">{% block subtitle %}Easily convert video files to text with Bolio.{% endblock %}</p>
     </header>
 
+    <!-- Navigation Section -->
     <nav class="bg-gray-200 py-4 shadow-md">
-        <div class="container mx-auto flex justify-center gap-4">
-            <a href="/" class="text-blue-600 hover:text-blue-800 font-semibold">Home</a>
-            {% if session_id.is_some() %}
-                <a href="/signout" class="text-blue-600 hover:text-blue-800 font-semibold">Sign Out</a>
-            {% else %}
-                <a href="/signin" class="text-blue-600 hover:text-blue-800 font-semibold">Sign In</a>
-            {% endif %}
-            <a href="/signup" class="text-blue-600 hover:text-blue-800 font-semibold">Sign Up</a>
-            <a href="/video2text" class="text-blue-600 hover:text-blue-800 font-semibold">Video-2-Text</a>
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Left Section: General Links -->
+            <div class="flex gap-4">
+                <a href="/" class="text-blue-600 hover:text-blue-800 font-semibold">Home</a>
+                <a href="/video2text" class="text-blue-600 hover:text-blue-800 font-semibold">Video-2-Text</a>
+            </div>
+
+            <!-- Right Section: User-Specific Links -->
+            <div class="flex items-center gap-4">
+                {% if session_id.is_some() %}
+                    <p class="text-gray-700">Logged in as: <strong>{{ username }}</strong></p>
+                    {% if username == "admin" %}
+                    <a href="/add_credit" class="text-blue-600 hover:text-blue-800 font-semibold">Add Credit</a>
+                    {% endif %}    
+                    <a href="/signout" class="text-blue-600 hover:text-blue-800 font-semibold">Sign Out</a>
+                {% else %}
+                    <a href="/signin" class="text-blue-600 hover:text-blue-800 font-semibold">Sign In</a>
+                    <a href="/signup" class="text-blue-600 hover:text-blue-800 font-semibold">Sign Up</a>
+                {% endif %}
+            </div>
         </div>
     </nav>
-
-    <!-- <nav class="bg-gray-200 py-4 shadow-md">
-        <div class="container mx-auto flex justify-center gap-4">
-            <a href="/" class="text-blue-600 hover:text-blue-800 font-semibold">Home</a>
-            <a id="signin-link" href="/signin" class="text-blue-600 hover:text-blue-800 font-semibold">Sign In</a>
-            <a href="/signup" class="text-blue-600 hover:text-blue-800 font-semibold">Sign Up</a>
-        </div>
-    </nav> -->
-
 
     <!-- Main Content Section -->
     <main class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg max-w-3xl">

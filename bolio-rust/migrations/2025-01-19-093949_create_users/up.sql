@@ -40,7 +40,7 @@ CREATE TABLE credit_transactions (
     transaction_type VARCHAR NOT NULL, -- Type of transaction (e.g., "top-up", "refund")
     amount BIGINT NOT NULL CHECK (amount > 0), -- Amount of credits added in bytes
     source VARCHAR NOT NULL, -- Payment source/type (e.g., "paypal", "stripe", "solana", "btc", "eth")
-    transaction_id VARCHAR NOT NULL UNIQUE, -- Unique identifier for the transaction
+    ref_num VARCHAR NOT NULL, --reference number for the transaction
     status VARCHAR NOT NULL, -- Transaction status (e.g., "pending", "completed", "failed")
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), -- Transaction timestamp
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), -- Last status update timestamp

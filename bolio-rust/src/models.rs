@@ -36,7 +36,7 @@ pub struct CreditTransaction {
     pub transaction_type: String,
     pub amount: i64, // Credit amount in bytes (BIGINT)
     pub source: String,
-    pub transaction_id: String, // Unique identifier for the transaction
+    pub ref_num: String, // reference number for the transaction
     pub status: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -51,7 +51,7 @@ pub struct NewCreditTransaction {
     pub transaction_type: String,
     pub amount: i64,
     pub source: String,
-    pub transaction_id: String,
+    pub ref_num: String,
     pub status: String,
     pub description: Option<String>,
 }

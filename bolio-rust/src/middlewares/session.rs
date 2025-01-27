@@ -46,18 +46,30 @@ where
     }
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let session_id = req
-            .cookie("session_id")
-            .map(|cookie| cookie.value().to_string());
+        // let session_id = req
+        //     .cookie("session_id")
+        //     .map(|cookie| cookie.value().to_string());
 
-        // Store the session_id in request extensions for later access
-        req.extensions_mut().insert(session_id);
+        // // Store the session_id in request extensions for later access
+        // req.extensions_mut().insert(session_id);
+
+        let path = req.path().to_string();
 
         let fut = self.service.call(req);
-
+        
         Box::pin(async move {
             let res = fut.await?;
             Ok(res)
+
+            // let res = fut.await;
+            // match &res {
+            //     Ok(response) => {
+            //         log::info!("Middleware passed response for path: {}", path);
+            //         log::info!("Response status: {:?}", response.response().status());
+            //     }
+            //     Err(e) => log::error!("Error in middleware for path {}: {:?}", path, e),
+            // }
+            // res
         })
     }
 }

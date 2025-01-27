@@ -21,7 +21,7 @@ diesel::table! {
         transaction_type -> Varchar,
         amount -> Int8,
         source -> Varchar,
-        transaction_id -> Varchar,
+        ref_num -> Varchar,
         status -> Varchar,
         created_at -> Timestamptz,
         updated_at -> Timestamptz,
