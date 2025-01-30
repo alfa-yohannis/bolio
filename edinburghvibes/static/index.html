@@ -232,36 +232,48 @@
 
   <div class="gallery" id="gallery"></div>
   <script>
+    // Sleep function
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     async function loadImages() {
       const response = await fetch('/gallery/images.json'); // Fetch the JSON file
-      const data = await response.json(); 
-
+      const data = await response.json();
       const gallery = document.getElementById('gallery');
-      data.images.forEach(image => {
+
+      for (const image of data.images) {
         const img = document.createElement('img');
         img.src = `/gallery/${image}`;
         img.alt = image;
         img.style.opacity = '0'; // Initially set opacity to 0
+ 
+        await new Promise((resolve) => {
+          img.onload = () => {
+            img.style.animation = 'fadeInImage 1s ease-in-out forwards';
 
-        img.onload = () => {
-          img.style.animation = 'fadeInImage 1s ease-in-out forwards';
-
-          const aspectRatio = img.naturalWidth / img.naturalHeight;
-          if (aspectRatio !== 9 / 16) {
-            img.classList.add('enlarged');
-          }
-          if (img.naturalWidth > img.naturalHeight) {
-            img.classList.add('landscape');
-          }
-        };
+            const aspectRatio = img.naturalWidth / img.naturalHeight;
+            if (aspectRatio !== 9 / 16) {
+              img.classList.add('enlarged');
+            }
+            if (img.naturalWidth > img.naturalHeight) {
+              img.classList.add('landscape');
+            }
+            resolve(); // Ensure it waits for each image to load
+          };
+        });
 
         img.addEventListener('click', () => {
           window.open(img.src, '_blank');
         });
 
         gallery.appendChild(img);
-      });
+
+        // Sleep for 1 second before adding the next image
+        await sleep(400);
+      }
     }
+
 
 
     function toggleMenu() {
