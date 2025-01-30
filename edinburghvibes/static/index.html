@@ -192,6 +192,23 @@
         opacity: 1;
       }
     }
+
+    @keyframes fadeInImage {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .gallery img {
+      width: 100%;
+      opacity: 0;
+      /* Initially hide images */
+      animation: fadeInImage 1s ease-in-out forwards;
+    }
   </style>
 </head>
 
@@ -217,14 +234,18 @@
   <script>
     async function loadImages() {
       const response = await fetch('/gallery/images.json'); // Fetch the JSON file
-      const data = await response.json();
+      const data = await response.json(); 
 
       const gallery = document.getElementById('gallery');
       data.images.forEach(image => {
         const img = document.createElement('img');
         img.src = `/gallery/${image}`;
         img.alt = image;
+        img.style.opacity = '0'; // Initially set opacity to 0
+
         img.onload = () => {
+          img.style.animation = 'fadeInImage 1s ease-in-out forwards';
+
           const aspectRatio = img.naturalWidth / img.naturalHeight;
           if (aspectRatio !== 9 / 16) {
             img.classList.add('enlarged');
@@ -233,12 +254,15 @@
             img.classList.add('landscape');
           }
         };
+
         img.addEventListener('click', () => {
           window.open(img.src, '_blank');
         });
+
         gallery.appendChild(img);
       });
     }
+
 
     function toggleMenu() {
       const links = document.querySelectorAll('nav a');
