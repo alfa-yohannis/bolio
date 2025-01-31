@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="4.1674285mm"
+   height="4.1674285mm"
+   viewBox="0 0 4.1674285 4.1674285"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="logo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:object-paths="true"
+     inkscape:snap-intersection-paths="true"
+     inkscape:snap-midpoints="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:snap-object-midpoints="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:snap-nodes="true"
+     inkscape:snap-others="true"
+     inkscape:object-nodes="true"
+     inkscape:snap-center="true"
+     inkscape:zoom="18.358698"
+     inkscape:cx="10.785079"
+     inkscape:cy="2.4511542"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     width="5.207mm"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:snap-global="true">
+    <sodipodi:guide
+       position="-76.777807,-16.364716"
+       orientation="1,0"
+       id="guide905" />
+    <sodipodi:guide
+       position="-76.777806,-70.300546"
+       orientation="0,-1"
+       id="guide939" />
+    <sodipodi:guide
+       position="-76.777807,31.640115"
+       orientation="0,-1"
+       id="guide941" />
+    <sodipodi:guide
+       position="-99.330685,18.897535"
+       orientation="1,0"
+       id="guide975" />
+    <sodipodi:guide
+       position="-37.105921,-46.298126"
+       orientation="1,0"
+       id="guide1730" />
+    <sodipodi:guide
+       position="-61.088192,2.0031045"
+       orientation="1,0"
+       id="guide1777" />
+    <sodipodi:guide
+       position="-72.364629,3.9597245"
+       orientation="1,0"
+       id="guide1779" />
+    <sodipodi:guide
+       position="-88.054247,10.318744"
+       orientation="1,0"
+       id="guide1781" />
+    <sodipodi:guide
+       position="-25.829493,-46.298136"
+       orientation="1,0"
+       id="guide1392" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2">
+    <rect
+       x="452.98877"
+       y="395.91815"
+       width="178.31908"
+       height="192.31422"
+       id="rect4243" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-121.09395,-108.54784)">
+    <rect
+       style="fill:none;fill-opacity:1;stroke-width:0.264583"
+       id="rect15731"
+       width="4.1674285"
+       height="4.1674285"
+       x="121.09395"
+       y="108.54784"
+       inkscape:export-filename="/data1/projects/bolio/website/static/images/hero.png"
+       inkscape:export-xdpi="1645.6191"
+       inkscape:export-ydpi="1645.6191" />
+    <g
+       aria-label="B"
+       transform="matrix(0.14120745,0,0,0.14120745,57.40489,51.731931)"
+       id="text4241"
+       style="font-weight:bold;font-size:40px;font-family:'Titillium Web';-inkscape-font-specification:'Titillium Web, Bold';white-space:pre;fill:#002d5a"
+       inkscape:export-filename="/data1/projects/bolio/website/static/images/hero.png"
+       inkscape:export-xdpi="1645.6191"
+       inkscape:export-ydpi="1645.6191">
+      <path
+         d="m 455.94828,403.51416 h 10.68 q 4.24,0 6.36,1.72 2.12,1.68 2.12,5.48 0,2.28 -0.68,3.64 -0.68,1.32 -2.32,2.36 1.8,0.76 2.64,2.2 0.88,1.44 0.88,4 0,3.96 -2.32,5.88 -2.32,1.92 -6.52,1.92 h -10.84 z m 10.56,15.84 h -5.04 v 6.64 h 5.04 q 1.8,0 2.64,-0.72 0.88,-0.72 0.88,-2.64 0,-3.28 -3.52,-3.28 z m -0.16,-11.12 h -4.88 v 6.48 h 4.92 q 3.12,0 3.12,-3.24 0,-3.24 -3.16,-3.24 z"
+         id="path14809" />
+    </g>
+  </g>
+</svg>
