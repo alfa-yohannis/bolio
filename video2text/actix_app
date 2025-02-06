@@ -1,0 +1,174 @@
+# Configuration for bolio.web.id and www.bolio.web.id
+server {
+    server_name bolio.web.id www.bolio.web.id;
+
+    client_max_body_size 1000M;
+
+    proxy_connect_timeout 6000s;
+    proxy_send_timeout 6000s;
+    proxy_read_timeout 6000s;
+    send_timeout 6000s;
+
+    proxy_request_buffering off;
+    proxy_buffering off;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        default_type "text/plain";
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;  # Actix app address for bolio
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+
+        proxy_connect_timeout 6000s;
+        proxy_send_timeout 6000s;
+        proxy_read_timeout 6000s;
+        send_timeout 6000s;
+
+        proxy_request_buffering off;
+        proxy_buffering off;
+
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/www.bolio.web.id/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/www.bolio.web.id/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+# Configuration for edinburghvibes.bolio.web.id
+server {
+    server_name edinburgh.vibes.bolio.web.id www.edinburgh.vibes.bolio.web.id;
+
+    client_max_body_size 1000M;
+
+    proxy_connect_timeout 6000s;
+    proxy_send_timeout 6000s;
+    proxy_read_timeout 6000s;
+    send_timeout 6000s;
+
+    proxy_request_buffering off;
+    proxy_buffering off;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        default_type "text/plain"; 
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8081;  # Actix app address for edinburghvibes
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+
+        proxy_connect_timeout 6000s;
+        proxy_send_timeout 6000s;
+        proxy_read_timeout 6000s;
+        send_timeout 6000s;
+
+        proxy_request_buffering off;
+        proxy_buffering off;
+
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/www.bolio.web.id/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/www.bolio.web.id/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+# Configuration for video2text.bolio.web.id
+server {
+    server_name video2text.bolio.web.id www.video2text.bolio.web.id;
+
+    client_max_body_size 1000M;
+
+    proxy_connect_timeout 6000s;
+    proxy_send_timeout 6000s;
+    proxy_read_timeout 6000s;
+    send_timeout 6000s;
+
+    proxy_request_buffering off;
+    proxy_buffering off;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        default_type "text/plain";
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8082;  # Actix app address for video2text
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+
+        proxy_connect_timeout 6000s;
+        proxy_send_timeout 6000s;
+        proxy_read_timeout 6000s;
+        send_timeout 6000s;
+
+        proxy_request_buffering off;
+        proxy_buffering off;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/video2text.bolio.web.id/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/video2text.bolio.web.id/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+
+server {
+    if ($host = bolio.web.id) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    if ($host = www.bolio.web.id) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    listen 80;
+    server_name bolio.web.id www.bolio.web.id;
+    return 404; # managed by Certbot
+}
+
+server {
+    if ($host = www.edinburgh.vibes.bolio.web.id) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    if ($host = edinburgh.vibes.bolio.web.id) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    listen 80;
+    server_name edinburgh.vibes.bolio.web.id www.edinburgh.vibes.bolio.web.id;
+    return 404; # managed by Certbot
+}
+
+server {
+    if ($host = www.video2text.bolio.web.id) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    if ($host = video2text.bolio.web.id) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    listen 80;
+    server_name video2text.bolio.web.id www.video2text.bolio.web.id;
+    return 404; # managed by Certbot
+}

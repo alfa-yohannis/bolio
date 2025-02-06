@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Bolio Video2Text Converter{% endblock %}
+{% block subtitle %}Easily convert video files to text with Bolio.{% endblock %}
+{% block content %}
+
+<h2 class="text-2xl font-semibold mb-4 text-gray-700">Upload Video</h2>
+<p class="text-gray-600 mb-6">Select a video file below to convert it to text.</p>
+
+<input type="hidden" id="username" value="{{ username }}" />
+
+<script>
+
+    const isGuest = document.getElementById("username").value === "Guest";
+
+    document.addEventListener("alpine:init", () => {
+        Alpine.data("fileUpload", () => ({
+            uploading: false,
+            success: false,
+            error: false,
+            selectedFileName: '',
+            email: '',
+            emailError: '',
+            resultText: '',
+            statusMessage: '',
+            websocket: null,
+
+            validateFile(file) {
+                if (!file) return false;
+
+                const fileSizeLimit = 10485760; // 10 MB in bytes
+                const allowedExtensions = [
+                    ".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".webm",
+                    ".mpg", ".mpeg", ".m4v", ".3gp", ".3g2", ".vob", ".ogv",
+                    ".rm", ".rmvb", ".asf", ".ts", ".m2ts", ".f4v", ".divx",
+                    ".xvid", ".mxf", ".hevc", ".h264", ".dv", ".drc", ".ogm",
+                    ".ivf", ".amv", ".av1", ".vp9", ".qt", ".prores", ".mp3",
+                    ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a", ".alac"
+                ];
+
+                const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+                if (!allowedExtensions.includes(fileExtension)) {
+                    alert(`Invalid file type. Allowed extensions are: ${allowedExtensions.join(', ')}`);
+                    return false;
+                }
+
+                if (file.size > fileSizeLimit) {
+                    alert('File size must be less than 10MB.');
+                    return false;
+                }
+
+                return true;
+            },
+
+            async uploadFile(event) {
+                const file = event.target.files[0];
+                if (!this.validateFile(file)) {
+                    event.target.value = ''; // Reset file input
+                    return;
+                }
+
+                this.selectedFileName = file.name;
+            },
+
+            startWebSocket() {
+                if (this.websocket && this.websocket.readyState !== WebSocket.CLOSED) {
+                    return; // Prevent multiple connections
+                }
+
+                this.websocket = new WebSocket("ws://localhost:8082/ws");
+
+                this.websocket.onopen = () => {
+                    console.log("WebSocket Connected");
+                    this.statusMessage = "Uploading...";
+                };
+
+                this.websocket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    console.log("WebSocket Message:", data);
+
+                    if (data.status) {
+                        this.statusMessage = data.status;
+                    }
+
+                    if (data.completed) {
+                        this.uploading = false;
+                        this.success = true;
+                        this.resultText = data.text || "";
+                        this.statusMessage = "Conversion Completed!";
+                        this.closeWebSocket();
+                    }
+                };
+
+                this.websocket.onerror = (error) => {
+                    console.error("WebSocket Error:", error);
+                    this.statusMessage = "WebSocket Error!";
+                };
+
+                this.websocket.onclose = () => {
+                    console.log("WebSocket Disconnected");
+                };
+            },
+
+            closeWebSocket() {
+                if (this.websocket) {
+                    this.websocket.close();
+                    this.websocket = null;
+                }
+            },
+
+            async submitForm(event) {
+                event.preventDefault();
+                this.uploading = true;
+                this.success = false;
+                this.error = false;
+                this.statusMessage = "Connecting to WebSocket...";
+
+                this.startWebSocket(); // Start WebSocket before uploading
+
+                const formData = new FormData(event.target);
+
+                // Upload File via HTTP POST
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            this.statusMessage = "File Uploaded, Processing...";
+                        } else {
+                            throw new Error(data.message || "Upload failed");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Upload Error:", error);
+                        this.uploading = false;
+                        this.error = true;
+                        this.statusMessage = "Error: " + error.message;
+                        this.closeWebSocket();
+                    });
+            }
+        }));
+    });
+</script>
+
+<!-- File Upload Form -->
+<form x-data="fileUpload" @submit.prevent="submitForm" class="flex flex-col gap-4">
+
+    <!-- Email Input -->
+    <div class="flex flex-col gap-2">
+        <label for="email" class="font-medium text-gray-700">Email Address (Optional - We'll send the result!)</label>
+        <input id="email" type="email" name="email"
+            class="border rounded-md py-2 px-3 w-full focus:ring focus:ring-blue-200" x-model="email"
+            @input="emailError = ''" />
+        <p x-show="emailError" class="text-red-600 text-sm" x-text="emailError"></p>
+    </div>
+
+    <!-- File Upload Input -->
+    <div class="flex flex-col items-center justify-center w-full gap-2">
+        <label for="file-upload"
+            class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md">
+            Select Video or Audio File
+            <input id="file-upload" type="file" name="file" class="hidden" required @change="uploadFile" />
+        </label>
+        <span x-show="selectedFileName" class="text-sm text-gray-600 mt-2">
+            📄 Selected File: <strong x-text="selectedFileName"></strong>
+        </span>
+    </div>
+
+    <!-- Status Message -->
+    <p x-show="uploading" class="text-blue-600 text-center mt-4" x-text="statusMessage"></p>
+
+    <!-- Running Wheel -->
+    <div x-show="uploading" class="flex justify-center mt-4">
+        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit"
+        class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md shadow-md disabled:opacity-50"
+        :disabled="uploading">
+        <span x-show="!uploading">Convert File</span>
+        <span x-show="uploading">Processing...</span>
+    </button>
+
+    <!-- Feedback Messages -->
+    <p x-show="success" class="text-green-600 text-center mt-2" x-text="statusMessage"></p>
+    <p x-show="error" class="text-red-600 text-center mt-2" x-text="statusMessage"></p>
+
+    <!-- Result Text Display -->
+    <div x-show="success" class="mt-6 p-4 bg-gray-100 border rounded-lg">
+        <h3 class="text-lg font-medium text-gray-700">Converted Text:</h3>
+        <textarea x-model="resultText" class="w-full mt-2 p-2 border rounded-md bg-white" rows="6" readonly></textarea>
+        <button type="button" @click="navigator.clipboard.writeText(resultText)"
+            class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md">
+            Copy to Clipboard
+        </button>
+    </div>
+</form>
+
+<style>
+    .loader {
+        border-color: #3498db transparent transparent transparent;
+        animation: spin 1.2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+{% endblock %}

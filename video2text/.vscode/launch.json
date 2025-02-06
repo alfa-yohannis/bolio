@@ -7,15 +7,15 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug executable 'bolio-rust'",
+      "name": "Debug executable 'video2text'",
       "cargo": {
         "args": [
           "build",
-          "--bin=bolio-rust",
-          "--package=bolio-rust"
+          "--bin=video2text",
+          "--package=video2text"
         ],
         "filter": {
-          "name": "bolio-rust",
+          "name": "video2text",
           "kind": "bin"
         }
       },
@@ -25,16 +25,16 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug unit tests in executable 'bolio-rust'",
+      "name": "Debug unit tests in executable 'video2text'",
       "cargo": {
         "args": [
           "test",
           "--no-run",
-          "--bin=bolio-rust",
-          "--package=bolio-rust"
+          "--bin=video2text",
+          "--package=video2text"
         ],
         "filter": {
-          "name": "bolio-rust",
+          "name": "video2text",
           "kind": "bin"
         }
       },

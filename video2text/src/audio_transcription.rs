@@ -1,6 +1,7 @@
 // audio_transcription.rs
 
 use hound::WavReader;
+use log::info;
 use std::fs::{self, File};
 use std::io::Write;
 use std::process::Command;
@@ -17,16 +18,20 @@ pub struct TranscriptionConfig {
 }
 
 impl TranscriptionConfig {
-    /// Ensure required directories exist
-    pub fn ensure_directories(&self) {
-        fs::create_dir_all("output").expect("Failed to create output directory");
-        fs::create_dir_all("transcription").expect("Failed to create transcription directory");
-    }
+    // /// Ensure required directories exist
+    // pub fn ensure_directories(&self) {
+    //     fs::create_dir_all("output").expect("Failed to create output directory");
+    //     fs::create_dir_all("transcription").expect("Failed to create transcription directory");
+    // }
 
     /// Extracts audio from a video and saves it as an AAC file.
     pub fn extract_audio(&self) {
         println!("🎬 Extracting audio from video...");
-        let status = Command::new("/data2/ffmpeg/bin/ffmpeg")
+        
+        info!("{}", self.video_path);
+        info!("{}", self.aac_audio_path);
+
+        let status = Command::new("/usr/bin/ffmpeg")
             .args([
                 "-i",
                 &self.video_path,
@@ -49,7 +54,7 @@ impl TranscriptionConfig {
     /// Converts AAC audio to WAV format (16kHz, mono).
     pub fn convert_audio(&self) {
         println!("🎵 Converting audio to 16kHz WAV format...");
-        let status = Command::new("/data2/ffmpeg/bin/ffmpeg")
+        let status = Command::new("/usr/bin/ffmpeg")
             .args([
                 "-i",
                 &self.aac_audio_path,

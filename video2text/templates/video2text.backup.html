@@ -51,12 +51,18 @@
     error = false;
     emailError = '';
     const formData = new FormData($refs.uploadForm);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 600000); // 10 minutes timeout (600s)
+
     fetch('/upload', {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: { 'Connection': 'keep-alive' },
+        signal: controller.signal
     })
     .then(response => {
-        //console.log(response);
+        console.log(response);
         // Check if response status is ok
         if (!response.ok) {
             //console.log(response);
@@ -68,7 +74,7 @@
         return response.json();
     })
     .then(data => {
-        //console.log(data);
+        console.log(data);
         uploading = false;
         if (data.status === 'success') {
             success = true;
@@ -84,7 +90,8 @@
         uploading = false;
         error = true;
         statusMessage = err.message || 'An unexpected error occurred.';
-    });
+    })
+    .finally(() => clearTimeout(timeout));
     
 " x-ref="uploadForm" class="flex flex-col gap-4">
 

@@ -1,3 +1,4 @@
+use actix::Addr;
 use actix_multipart::Multipart;
 use actix_web::Responder;
 use actix_web::{web, Error, HttpRequest, HttpResponse};
@@ -13,6 +14,7 @@ use std::io::Write;
 use crate::audio_transcription::TranscriptionConfig;
 use crate::models::NewConversionTransaction; // Model for inserting a conversion transaction
 use crate::models::User;
+use crate::progress_updater::{ProgressUpdate, ProgressUpdater};
 use crate::schema::{conversion_transactions, users}; // Diesel schema for users and conversion_transactions
 use crate::DbPool; // Database connection pool // Assuming you have a User model defined
 
@@ -43,17 +45,23 @@ pub async fn video2text(req: HttpRequest) -> impl Responder {
         .body(template.render().unwrap())
 }
 
+// pub async fn upload_file(
+//     req: HttpRequest,
+//     mut payload: Multipart,
+//     pool: web::Data<DbPool>,
+//     progress_addr: web::Data<Addr<ProgressUpdater>>,
+// ) -> Result<HttpResponse, Error> {
 pub async fn upload_file(
     req: HttpRequest,
     mut payload: Multipart,
     pool: web::Data<DbPool>,
+    progress_addr: web::Data<Addr<ProgressUpdater>>, // WebSocket for progress updates
 ) -> Result<HttpResponse, Error> {
-
     info!("upload_file");
 
     let mut conversion_result = String::new();
-    let mut source_size = 0; // To track the size of the uploaded file
-    let mut target_size = 0; // To simulate the size of the resulting transcription
+    let mut source_size = 0;
+    let mut target_size = 0;
 
     let conversion_type = "video-to-text";
     let target_type = "txt";
@@ -64,13 +72,14 @@ pub async fn upload_file(
 
     let username = req
         .cookie("username")
-        .map(|cookie| cookie.value().to_string());
+        .map(|cookie| cookie.value().to_string())
+        .unwrap_or_else(|| "Guest".to_string());
 
-    // Insert conversion transaction and update user credit
+    let is_guest = username == "Guest";
+
     let mut conn = pool.get().expect("Failed to get database connection");
 
-    let user = if let Some(ref username) = username {
-        // Retrieve the user by username and session_id
+    let user = if !is_guest {
         users::table
             .filter(users::username.eq(&username))
             .filter(users::session_id.eq(session_id.as_deref().unwrap_or("")))
@@ -81,27 +90,22 @@ pub async fn upload_file(
         None
     };
 
+    // Notify WebSocket that file upload has started
+    progress_addr.get_ref().do_send(ProgressUpdate {
+        session_id: session_id.clone().unwrap_or_default(),
+        message: "Uploading File...".to_string(),
+    });
+
     while let Some(mut field) = payload.try_next().await? {
         let content_disposition = field.content_disposition().unwrap();
-
-        // Extract filename
         let filename = content_disposition
             .get_filename()
             .unwrap_or("default_filename")
             .to_string();
 
-        // Handle email validation
         if field.name() == Some("email") {
             let email_data = field.try_next().await?.unwrap_or_default();
-            let email = match String::from_utf8(email_data.to_vec()) {
-                Ok(email) => email,
-                Err(_) => {
-                    return Ok(HttpResponse::BadRequest().json(json!({
-                        "status": "error",
-                        "message": "Invalid email data"
-                    })));
-                }
-            };
+            let email = String::from_utf8(email_data.to_vec()).unwrap_or_default();
             let email_regex =
                 Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap();
 
@@ -113,9 +117,7 @@ pub async fn upload_file(
             }
         }
 
-        // Create a file on the server and perform conversion
         if field.name() == Some("file") {
-            // Get the file extension
             let source_type = match filename.split('.').last() {
                 Some(ext) => ext.to_string(),
                 None => {
@@ -126,7 +128,6 @@ pub async fn upload_file(
                 }
             };
 
-            // Validate the file extension
             let valid_extensions = [
                 "mp4", "mkv", "avi", "mov", "wmv", "flv", "webm", "mpg", "mpeg", "m4v", "3gp",
                 "3g2", "vob", "ogv", "rm", "rmvb", "asf", "ts", "m2ts", "f4v", "divx", "xvid",
@@ -136,11 +137,11 @@ pub async fn upload_file(
 
             if !valid_extensions.contains(&source_type.as_str()) {
                 return Ok(HttpResponse::BadRequest().json(json!({
-                "status": "error",
-                "message": "Invalid file type"
+                    "status": "error",
+                    "message": "Invalid file type"
                 })));
             }
-            // Load configuration from a file
+
             let config_data = fs::read_to_string("config.json")?;
             let config_json: serde_json::Value = serde_json::from_str(&config_data)?;
 
@@ -150,38 +151,26 @@ pub async fn upload_file(
                 .unwrap_or("models/ggml-tiny-q5_1.bin");
             let language = config_json["language"].as_str().unwrap_or("en");
 
-            // Sanitize the filename
-            let _original_filename = sanitize_filename::sanitize(&filename);
-
-            // Create a new filename with a random UUID
-            let uuid_filename = format!("{}.{}", uuid::Uuid::new_v4(), "mp4");
+            let uuid_filename = format!("{}.{}", uuid::Uuid::new_v4(), source_type);
             let filepath = format!("./{}/{}", temp_dir, uuid_filename);
             let mut file = fs::File::create(&filepath)?;
 
-            // Write the chunks to the file and calculate the source size
             while let Some(chunk) = field.try_next().await? {
                 let data = chunk.as_ref();
                 file.write_all(data)?;
-                source_size += data.len() as i64; // Accumulate the source file size in bytes
+                source_size += data.len() as i64;
             }
 
-            // Check if username and session_id exist
-            if username.is_none() || session_id.is_none() {
-                if source_size > 10 * 1024 * 1024 {
-                    return Ok(HttpResponse::BadRequest().json(json!({
-                        "status": "error",
-                        "message": "File size must be smaller than 10 MB for unauthenticated users."
-                    })));
-                }
+            if is_guest && source_size > 10 * 1024 * 1024 {
+                return Ok(HttpResponse::BadRequest().json(json!({
+                    "status": "error",
+                    "message": "File size must be smaller than 10 MB for guests."
+                })));
             }
 
             if let Some(ref user) = user {
                 if source_size > user.credit {
-
-                    // Clean up temporary files
                     fs::remove_file(&filepath)?;
-
-                    info!("Insufficient credit for the file size.");
                     return Ok(HttpResponse::BadRequest().json(json!({
                         "status": "error",
                         "message": "Insufficient credit for the file size."
@@ -198,96 +187,68 @@ pub async fn upload_file(
                 language: language.to_string(),
             };
 
-            // Ensure necessary directories exist
-            config.ensure_directories();
+            progress_addr.get_ref().do_send(ProgressUpdate {
+                session_id: session_id.clone().unwrap_or_default(),
+                message: "Extracting Audio from Video...".to_string(),
+            });
 
-            // Step 1: Extract audio from the video
             config.extract_audio();
 
-            // Step 2: Convert audio to WAV
+            progress_addr.get_ref().do_send(ProgressUpdate {
+                session_id: session_id.clone().unwrap_or_default(),
+                message: "Converting Audio to WAV...".to_string(),
+            });
+
             config.convert_audio();
 
-            // Step 3: Load audio samples
-            let samples = config.load_audio_samples();
+            progress_addr.get_ref().do_send(ProgressUpdate {
+                session_id: session_id.clone().unwrap_or_default(),
+                message: "Transcribing Audio...".to_string(),
+            });
 
-            // Step 4: Transcribe audio
+            let samples = config.load_audio_samples();
             config.transcribe_audio(samples);
 
             conversion_result = fs::read_to_string(&config.transcription_path)?;
-
-            // Calculate the target file size based on the conversion result
             target_size = conversion_result.len() as i64;
-
-            // Calculate total credit used (source + target sizes)
             let credit_used = source_size + target_size;
 
-            if let Some(ref username) = username {
-                // Retrieve the user by username and session_id
-                let user = users::table
-                    .filter(users::username.eq(&username))
-                    .filter(users::session_id.eq(session_id.as_deref().unwrap_or("")))
-                    .first::<User>(&mut conn)
-                    .optional()
-                    .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+            if let Some(ref user) = user {
+                let new_transaction = NewConversionTransaction {
+                    user_id: user.id,
+                    source_size,
+                    target_size,
+                    conversion_type: conversion_type.to_string(),
+                    source_type: source_type,
+                    target_type: target_type.to_string(),
+                };
 
-                if let Some(user) = user {
-                    // Insert conversion transaction
-                    let new_transaction = NewConversionTransaction {
-                        user_id: user.id,
-                        source_size,
-                        target_size,
-                        conversion_type: conversion_type.to_string(),
-                        source_type: source_type,
-                        target_type: target_type.to_string(),
-                    };
+                conn.transaction::<_, diesel::result::Error, _>(|conn| {
+                    diesel::insert_into(conversion_transactions::table)
+                        .values(&new_transaction)
+                        .execute(conn)?;
 
-                    conn.transaction::<_, diesel::result::Error, _>(|conn| {
-                        diesel::insert_into(conversion_transactions::table)
-                            .values(&new_transaction)
-                            .execute(conn)?;
+                    diesel::update(users::table.filter(users::id.eq(user.id)))
+                        .set(users::credit.eq(users::credit - credit_used))
+                        .execute(conn)?;
 
-                        // Update user credit
-                        diesel::update(users::table.filter(users::id.eq(user.id)))
-                            .set(users::credit.eq(users::credit - credit_used))
-                            .execute(conn)?;
-
-                        Ok(())
-                    })
-                    .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
-
-                    // Clean up temporary files
-                    fs::remove_file(&filepath)?;
-                    fs::remove_file(&config.aac_audio_path)?;
-                    fs::remove_file(&config.wav_audio_path)?;
-                    fs::remove_file(&config.transcription_path)?;
-                } else {
-                    // Clean up temporary files
-                    fs::remove_file(&filepath)?;
-                    fs::remove_file(&config.aac_audio_path)?;
-                    fs::remove_file(&config.wav_audio_path)?;
-                    fs::remove_file(&config.transcription_path)?;
-
-                    return Ok(HttpResponse::BadRequest().json(json!({
-                        "status": "error",
-                        "message": "User not found"
-                    })));
-                }
-            } else {
-                // Clean up temporary files
-                fs::remove_file(&filepath)?;
-                fs::remove_file(&config.aac_audio_path)?;
-                fs::remove_file(&config.wav_audio_path)?;
-                fs::remove_file(&config.transcription_path)?;
-
-                // return Ok(HttpResponse::BadRequest().json(json!({
-                //     "status": "error",
-                //     "message": "Username not provided"
-                // })));
+                    Ok(())
+                })
+                .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
             }
+
+            progress_addr.get_ref().do_send(ProgressUpdate {
+                session_id: session_id.clone().unwrap_or_default(),
+                message: "Processing Completed!".to_string(),
+            });
+
+            fs::remove_file(&filepath)?;
+            fs::remove_file(&config.aac_audio_path)?;
+            fs::remove_file(&config.wav_audio_path)?;
+            fs::remove_file(&config.transcription_path)?;
         }
     }
 
-    // Return JSON response
     Ok(HttpResponse::Ok().json(json!({
         "status": "success",
         "message": "File uploaded successfully.",
