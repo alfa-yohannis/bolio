@@ -20,6 +20,7 @@ use dotenvy::dotenv;
 use log::info;
 use middlewares::session::SessionMiddleware;
 use progress_updater::ProgressUpdater;
+use std::collections::HashMap;
 use std::env;
 use std::fs as std_fs;
 use std::time::Duration;
@@ -36,8 +37,10 @@ async fn main() -> std::io::Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
      // Initialize the ProgressUpdater actor
-     let progress_updater = ProgressUpdater { clients: Vec::new() }.start();
-    
+     let progress_updater = ProgressUpdater {
+        clients: HashMap::new(),
+    }
+    .start();
     // Load environment variables from .env
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
