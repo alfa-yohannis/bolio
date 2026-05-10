@@ -8,7 +8,7 @@ async fn main() -> std::io::Result<()> {
             // Serve the `index.html` file as the root
             .service(fs::Files::new("/", "./static").index_file("index.html"))
     })
-    .bind(("127.0.0.1", 8081))?
+    .bind(("0.0.0.0", 8000))?
     .run()
     .await
 }
