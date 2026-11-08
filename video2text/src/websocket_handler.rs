@@ -1,8 +1,8 @@
-use actix::{Actor, StreamHandler, Addr, AsyncContext, Handler, Message};
+use crate::progress_updater::{ProgressUpdate, ProgressUpdater, RegisterClient, UnregisterClient};
+use actix::{Actor, Addr, AsyncContext, Handler, Message, StreamHandler};
 use actix_web::{web, Error, HttpRequest, HttpResponse};
 use actix_web_actors::ws;
 use log::info;
-use crate::progress_updater::{ProgressUpdater, ProgressUpdate, RegisterClient, UnregisterClient};
 
 /// WebSocket session actor
 pub struct WebSocketSession {
@@ -39,7 +39,10 @@ impl Handler<ProgressUpdate> for WebSocketSession {
     type Result = ();
 
     fn handle(&mut self, msg: ProgressUpdate, ctx: &mut Self::Context) {
-        info!("WebSocket Progress Update: {} for session {}", msg.message, msg.session_id);
+        info!(
+            "WebSocket Progress Update: {} for session {}",
+            msg.message, msg.session_id
+        );
         ctx.text(msg.message); // Send message to the WebSocket client
     }
 }
@@ -72,12 +75,18 @@ pub async fn ws_route(
     stream: web::Payload,
     progress_addr: web::Data<Addr<ProgressUpdater>>, // Inject ProgressUpdater
 ) -> Result<HttpResponse, Error> {
-    let session_id = req
-        .query_string()
-        .split('=')
-        .nth(1)
-        .unwrap_or("")
-        .to_string();
+    
+    // let session_id = req
+    //     .query_string()
+    //     .split('=')
+    //     .nth(1)
+    //     .unwrap_or("")
+    //     .to_string();
+
+    let session_id: String = req
+        .cookie("session_id")
+        .map(|cookie| cookie.value().to_string())
+        .unwrap_or_else(|| "".to_string());
 
     ws::start(
         WebSocketSession {

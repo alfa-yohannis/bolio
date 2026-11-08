@@ -13,7 +13,7 @@ mod websocket_handler;
 
 use actix::Actor;
 use actix_files as fs;
-use actix_web::{web, App, HttpServer};
+use actix_web::{web, App, HttpRequest, HttpServer};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{self, ConnectionManager}; // Use Diesel's r2d2 integration
 use dotenvy::dotenv;
@@ -76,11 +76,16 @@ async fn main() -> std::io::Result<()> {
                 web::post().to(add_credit_handler::add_credit),
             ) // Add credit page route
             .route("/video2text", web::get().to(video2text_handler::video2text))
+            .route("/favicon.ico", web::get().to(favicon))
         // Sign-out route
     })
     .keep_alive(Duration::from_secs(600))
     .client_request_timeout(Duration::from_secs(600))
-    .bind(("127.0.0.1", 8082))?
+    .bind(("127.0.0.1", 8083))?
     .run()
     .await
+}
+
+async fn favicon(_req: HttpRequest) -> Result<fs::NamedFile, std::io::Error> {
+    Ok(fs::NamedFile::open("static/favicon.ico")?)
 }

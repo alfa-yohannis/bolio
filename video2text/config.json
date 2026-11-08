@@ -1,5 +1,5 @@
 {
   "temp_dir": "temp",
   "model_path": "models/ggml-tiny-q5_1.bin",
-  "language": "en"
+  "language": "id"
 }
